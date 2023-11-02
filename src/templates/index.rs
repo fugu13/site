@@ -19,7 +19,7 @@ fn index_page<G: Html>(cx: Scope, state: &IndexRx) -> View<G> {
             div {
                 p {
                     "Traditional sporadic software developer blogging. I'm currently looking for a new position, "
-                    a(href="mailto:fugu13@gmail.com") { "hire me" }
+                    a(href="https://www.linkedin.com/in/russell-duhon-322a0244") { "hire me" }
                     "."
                 }
             }
