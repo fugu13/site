@@ -26,6 +26,7 @@ jobs:
         restore-keys: ${{ runner.os }}-cargo-
     - name: Install Perseus
       run: cargo install perseus-cli
+      continue-on-error: true
     - name: Check
       run: perseus check -g --verbose
     - name: Run tests
