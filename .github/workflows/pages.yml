@@ -38,6 +38,7 @@ jobs:
         restore-keys: ${{ runner.os }}-cargo-
     - name: Install Perseus
       run: cargo install perseus-cli
+      continue-on-error: true
     - name: Build
       run: perseus deploy -e --verbose
     - name: Fix permissions
