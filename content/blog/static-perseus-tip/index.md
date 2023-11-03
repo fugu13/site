@@ -1,6 +1,6 @@
 ---
 title: Quick Tip for Static Perseus Websites
-date: '2023-11-02T11:30:00-08:00'
+date: '2023-11-02T12:50:00-08:00'
 ---
 
 It took me a bit to put all the pieces together, so I'm posting them here in one place.
