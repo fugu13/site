@@ -123,6 +123,6 @@ There're a number of other details, which you can read about on the Perseus webs
 but the above covers most of the code I had to write for generating this very page. Then, since I only need
 build-time and client-side rendering for my site (in other words, I'm generating a static site that's nothing but
 HTML and Javascript and WebAssembly), I can export it and put it on a static site host, using the command
-`perseus deploy -g`.
+`perseus deploy --export-static`.
 
 Want more details on any specifics? Let me know!
