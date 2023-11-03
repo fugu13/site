@@ -72,6 +72,8 @@ jobs:
         continue-on-error: true
       - name: Build
         run: perseus deploy -e --verbose
+        env:
+          PERSEUS_BASE_PATH: /site/
       - name: Fix permissions
         run: |
           chmod -c -R +rX "pkg/" | while read line; do
