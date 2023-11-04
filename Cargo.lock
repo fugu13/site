@@ -823,16 +823,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
-name = "pretty_date"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e571dbb1016c8394a881479c80467b4809700c10b483dc220761fd09656eb29"
-dependencies = [
- "chrono",
- "lazy_static",
-]
-
-[[package]]
 name = "proc-macro2"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1006,7 +996,6 @@ dependencies = [
  "markdown",
  "perseus",
  "perseus-axum",
- "pretty_date",
  "serde",
  "serde_json",
  "serde_yaml",

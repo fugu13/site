@@ -30,6 +30,7 @@ pub fn get_blog_directories() -> Vec<String> {
 pub struct Post {
     pub title: String,
     pub date: chrono::DateTime<FixedOffset>,
+    pub description: Option<String>,
     pub html: String,
     pub path: String,
 }
@@ -37,7 +38,8 @@ pub struct Post {
 #[derive(Serialize, Deserialize)]
 pub struct FrontMatter {
     pub title: String,
-    pub date: String,
+    pub date: chrono::DateTime<FixedOffset>,
+    pub description: Option<String>,
 }
 
 pub fn get_front_matter(contents: &str) -> FrontMatter {
@@ -82,7 +84,8 @@ pub fn get_post_for_path(path: &String) -> Post {
     Post {
         path: path.clone(),
         title: front_matter.title,
-        date: chrono::DateTime::parse_from_rfc3339(&front_matter.date).expect("Invalid date time"),
+        date: front_matter.date,
+        description: front_matter.description,
         html,
     }
 }

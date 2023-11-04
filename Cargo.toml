@@ -15,7 +15,6 @@ markdown = "1.0.0-alpha.14"
 serde_yaml = "0.9.25"
 thiserror = "1.0.50"
 chrono = { version = "0.4.31", features = [ "serde"] }
-pretty_date = "0.1.2"
 
 # Engine-only dependencies go here
 [target.'cfg(engine)'.dependencies]

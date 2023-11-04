@@ -1,6 +1,7 @@
 ---
 title: Messily Thinking Pythonically
 date: '2018-02-02T12:12:12-08:00'
+description: I attempt to narrate my thought process solving a data transformation problem.
 ---
 
 Solving a data transformation problem Pythonically, explained in far too much detail.

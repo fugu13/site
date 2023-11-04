@@ -1,6 +1,5 @@
 use crate::data::Post;
 use perseus::prelude::*;
-use pretty_date::pretty_date_formatter::PrettyDateFormatter;
 use serde::{Deserialize, Serialize};
 use sycamore::prelude::*;
 
@@ -26,17 +25,29 @@ fn index_page<G: Html>(cx: Scope, state: &IndexRx) -> View<G> {
             div {
                 h3 { "Blog"}
 
-                ul {
+                div {
                     Keyed(
                         iterable=&state.posts,
                         view=|cx, post| view! { cx,
-                            li {
-                                a(href=format!("post/{}", post.path)) { (post.title.clone()) }
-                                " "
-                                span { (post.date.clone().naive_local().format_pretty()) }
+                            div {
+                                h5 {
+                                    a(href=format!("post/{}", post.path)) { (post.title.clone()) }
+                                }
+                                h6(style="display: inline") {
+                                    span { (post.date.date_naive().format("%-d %B %C%y")) }
+                                }
+                                (if let Some(description) = post.description.clone() {
+                                    view! { cx,
+                                        p {
+                                            (description)
+                                        }
+                                    }
+                                } else {
+                                    view! { cx, }
+                                })
                             }
                         },
-                        key=|post| post.title.clone()
+                        key=|post| post.path.clone()
                     )
                 }
             }
@@ -48,7 +59,8 @@ fn index_page<G: Html>(cx: Scope, state: &IndexRx) -> View<G> {
 fn head(cx: Scope) -> View<SsrNode> {
     view! { cx,
         title { "Russell Duhon" }
-        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css")
+        link(rel="stylesheet", href="https://unpkg.com/sakura.css/css/sakura.css", media="screen")
+        link(rel="stylesheet", href=".perseus/static/extra.css")
     }
 }
 

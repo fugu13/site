@@ -22,7 +22,8 @@ fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
 fn head(cx: Scope, state: Post) -> View<SsrNode> {
     view! { cx,
         title { (state.title) }
-        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css")
+        link(rel="stylesheet", href="https://unpkg.com/sakura.css/css/sakura.css", media="screen")
+        link(rel="stylesheet", href=".perseus/static/extra.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css")
     }
 }
