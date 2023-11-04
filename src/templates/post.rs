@@ -1,5 +1,7 @@
 use crate::data::Post;
 use perseus::prelude::*;
+#[cfg(engine)]
+use perseus::utils::get_path_prefix_server;
 use sycamore::prelude::*;
 
 #[auto_scope]
@@ -21,11 +23,19 @@ fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
 #[engine_only_fn]
 fn head(cx: Scope, post: Post) -> View<SsrNode> {
     let full_title = format!("{} by Russell Duhon", &post.title);
+    let full_image_url = post.image.map(|url| format!("{}/{}", get_path_prefix_server(), url));
     view! { cx,
         title { (post.title) }
         meta(property="og:title", content=full_title)
         meta(property="og:type", content="article")
         meta(property="article:published_time", content=post.date.to_rfc3339())
+        (if let Some(url) = full_image_url.clone() {
+            view! { cx,
+                meta(property="og:image", content=url)
+            }
+        } else {
+            view! { cx, }
+        })
         (if let Some(description) = post.description.clone() {
             view! { cx,
                 meta(property="og:description", content=description)

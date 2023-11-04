@@ -6,6 +6,7 @@ use std::fs::{DirEntry, File};
 use std::io;
 use std::io::Read;
 use std::path::Path;
+use regex::Regex;
 
 pub fn get_blog_directories() -> Vec<String> {
     let listing: io::Result<Vec<DirEntry>> = Path::new("content/blog")
@@ -25,6 +26,7 @@ pub fn get_blog_directories() -> Vec<String> {
         .collect()
 }
 
+
 #[derive(Serialize, Deserialize, Clone, ReactiveState, PartialEq)]
 #[rx(alias = "PostRx")]
 pub struct Post {
@@ -33,13 +35,16 @@ pub struct Post {
     pub description: Option<String>,
     pub html: String,
     pub path: String,
+    pub image: Option<String>,
 }
+
 
 #[derive(Serialize, Deserialize)]
 pub struct FrontMatter {
     pub title: String,
     pub date: chrono::DateTime<FixedOffset>,
     pub description: Option<String>,
+    pub image: Option<String>,
 }
 
 pub fn get_front_matter(contents: &str) -> FrontMatter {
@@ -80,6 +85,11 @@ pub fn get_post_for_path(path: &String) -> Post {
     )
     .expect("cannot render post html");
 
+    let image = front_matter.image.or_else(|| {
+        let re = Regex::new(r#"src="([^"]+)""#).unwrap();
+        re.captures(&html).map(|img| img[1].to_string())
+    });
+
     // whatever convert it twice. Should probably just manually pull the yaml instead.
     Post {
         path: path.clone(),
@@ -87,5 +97,6 @@ pub fn get_post_for_path(path: &String) -> Post {
         date: front_matter.date,
         description: front_matter.description,
         html,
+        image,
     }
 }
