@@ -29,8 +29,8 @@ fn index_page<G: Html>(cx: Scope, state: &IndexRx) -> View<G> {
                     Keyed(
                         iterable=&state.posts,
                         view=|cx, post| view! { cx,
-                            div {
-                                h5 {
+                            div(style="margin-bottom: 3em;") {
+                                h4 {
                                     a(href=format!("post/{}", post.path)) { (post.title.clone()) }
                                 }
                                 h6(style="display: inline") {
@@ -38,7 +38,7 @@ fn index_page<G: Html>(cx: Scope, state: &IndexRx) -> View<G> {
                                 }
                                 (if let Some(description) = post.description.clone() {
                                     view! { cx,
-                                        p {
+                                        blockquote {
                                             (description)
                                         }
                                     }
