@@ -1,6 +1,7 @@
 ---
 title: Writing a Static Site with Rust and Perseus
 date: '2023-11-02T11:30:00-08:00'
+description: The basics of defining pages, making templates, and filling them with data, all using Rust that gets turned into WebAssembly.
 ---
 
 Like many a developer, I've experimented with a bunch of static site generators over time. Right now I'm using

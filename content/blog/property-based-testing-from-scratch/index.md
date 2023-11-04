@@ -1,6 +1,7 @@
 ---
 title: Property-based Testing from Scratch (in Python)
 date: '2018-02-13T12:12:12-08:00'
+description: Writing a property-based test with no framework to understand how they work, and how they're useful for general application programming.
 ---
 
 Using a single, short property-based test written without a framework to guide the development of a tricky piece of date logic involving leap years.

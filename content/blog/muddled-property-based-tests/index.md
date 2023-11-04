@@ -1,6 +1,7 @@
 ---
 title: Muddled (Property-based) Tests
 date: '2018-02-09T12:12:12-08:00'
+description: Writing really really good tests for a real world data transformation problem.
 ---
 
 I solved a data transformation problem Pythonically, but there were no tests! Here’s how I might test it.
