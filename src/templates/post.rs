@@ -19,9 +19,21 @@ fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
 }
 
 #[engine_only_fn]
-fn head(cx: Scope, state: Post) -> View<SsrNode> {
+fn head(cx: Scope, post: Post) -> View<SsrNode> {
+    let full_title = format!("{} by Russell Duhon", &post.title);
     view! { cx,
-        title { (state.title) }
+        title { (post.title) }
+        meta(property="og:title", content=full_title)
+        meta(property="og:type", content="article")
+        meta(property="article:published_time", content=post.date.to_rfc3339())
+        (if let Some(description) = post.description.clone() {
+            view! { cx,
+                meta(property="og:description", content=description)
+            }
+        } else {
+            view! { cx, }
+        })
+        meta(property="og:site_name", content="Russell Duhon's Blog")
         link(rel="stylesheet", href="https://unpkg.com/sakura.css/css/sakura.css", media="screen")
         link(rel="stylesheet", href=".perseus/static/extra.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css")
