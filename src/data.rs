@@ -1,12 +1,12 @@
 use chrono::FixedOffset;
 use markdown::{to_html_with_options, CompileOptions, Constructs, Options, ParseOptions};
 use perseus::ReactiveState;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::fs::{DirEntry, File};
 use std::io;
 use std::io::Read;
 use std::path::Path;
-use regex::Regex;
 
 pub fn get_blog_directories() -> Vec<String> {
     let listing: io::Result<Vec<DirEntry>> = Path::new("content/blog")
@@ -26,7 +26,6 @@ pub fn get_blog_directories() -> Vec<String> {
         .collect()
 }
 
-
 #[derive(Serialize, Deserialize, Clone, ReactiveState, PartialEq)]
 #[rx(alias = "PostRx")]
 pub struct Post {
@@ -37,7 +36,6 @@ pub struct Post {
     pub path: String,
     pub image: Option<String>,
 }
-
 
 #[derive(Serialize, Deserialize)]
 pub struct FrontMatter {
@@ -80,7 +78,6 @@ pub fn get_post_for_path(path: &String) -> Post {
                 allow_dangerous_html: true,
                 ..Default::default()
             },
-            ..Default::default()
         },
     )
     .expect("cannot render post html");
