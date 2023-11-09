@@ -73,7 +73,7 @@ jobs:
       - name: Build
         run: perseus deploy -e --verbose
         env:
-          PERSEUS_BASE_PATH: https://fugu13.github.io/site/
+          PERSEUS_BASE_PATH: https://www.russellduhon.com/
       - name: Fix permissions
         run: |
           chmod -c -R +rX "pkg/" | while read line; do
