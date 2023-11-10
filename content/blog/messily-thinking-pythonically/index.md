@@ -8,7 +8,7 @@ Solving a data transformation problem Pythonically, explained in far too much de
 
 ![python powered logo](.perseus/static/python-powered.png)
 
-_(To see what tests for all this look like, check out my later post, [Muddled Property-based Tests](/muddled-property-based-tests/). This post originally appeared on Medium, but I've moved it to my personal site.)_
+_(To see what tests for all this look like, check out my later post, [Muddled Property-based Tests](/post/muddled-property-based-tests/). This post originally appeared on Medium, but I've moved it to my personal site.)_
 
 I’m a member of the Puget Sound Programming Python (**PuPPy**) user group, and we have a large and active Slack ([join us!](http://slack.pspython.com)). One of my favorite channels is **#q-and-a**, where anyone can ask just about anything and get help. Someone recently asked about transforming one data structure to another, and especially about how to do it Pythonically, and I was able to help out.
 

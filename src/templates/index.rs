@@ -31,7 +31,7 @@ fn index_page<G: Html>(cx: Scope, state: &IndexRx) -> View<G> {
                         view=|cx, post| view! { cx,
                             div(style="margin-bottom: 3em;") {
                                 h4 {
-                                    a(href=format!("post/{}", post.path)) { (post.title.clone()) }
+                                    a(href=format!("post/{}/", post.path)) { (post.title.clone()) }
                                 }
                                 h6(style="display: inline") {
                                     span { (post.date.date_naive().format("%-d %B %C%y")) }

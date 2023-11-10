@@ -10,7 +10,7 @@ I solved a data transformation problem Pythonically, but there were no tests! He
 
 \_(This post originally appeared on Medium, but I've moved it to my personal site.)
 
-In a previous post I solved a problem by [Messily Thinking Pythonically](/messily-thinking-pythonically/). There was one very Pythonic thing I didn’t do, though — I didn’t write **tests**. Partly that was because this was a quick bit of code I wrote one-off, and also partly because that blog post was already a bit over-long.
+In a previous post I solved a problem by [Messily Thinking Pythonically](/post/messily-thinking-pythonically/). There was one very Pythonic thing I didn’t do, though — I didn’t write **tests**. Partly that was because this was a quick bit of code I wrote one-off, and also partly because that blog post was already a bit over-long.
 
 To recap, the core of the problem is simple: transform data from structures like
 
