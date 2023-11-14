@@ -16,8 +16,8 @@ To recap, the core of the problem is simple: transform data from structures like
 
 ```python
 boop = {
-    “hello”: [1, 2, 3],
-    “bye”: [4, 5, 6]
+  “hello”: [1, 2, 3],
+  “bye”: [4, 5, 6]
 }
 ```
 
@@ -25,15 +25,15 @@ Into structures like
 
 ```python
 beep = [
-    {“hello”: 1, “bye”: 4},
-    {“hello”: 1, “bye”: 5},
-    {“hello”: 1, “bye”: 6},
-    {“hello”: 2, “bye”: 4},
-    {“hello”: 2, “bye”: 5},
-    {“hello”: 2, “bye”: 6},
-    {“hello”: 3, “bye”: 4},
-    {“hello”: 3, “bye”: 5},
-    {“hello”: 3, “bye”: 6}
+  {“hello”: 1, “bye”: 4},
+  {“hello”: 1, “bye”: 5},
+  {“hello”: 1, “bye”: 6},
+  {“hello”: 2, “bye”: 4},
+  {“hello”: 2, “bye”: 5},
+  {“hello”: 2, “bye”: 6},
+  {“hello”: 3, “bye”: 4},
+  {“hello”: 3, “bye”: 5},
+  {“hello”: 3, “bye”: 6}
 ]
 ```
 
@@ -43,9 +43,9 @@ Okay, so, testing that. The obvious first test is:
 
 ```python
 def test_combos():
-    boop = …
-    beep = …
-    assert combos(boop) == beep
+  boop = …
+  beep = …
+  assert combos(boop) == beep
 ```
 
 Not too bad, but **only tests one very particular dataset**, there should probably be some other examples… how many? Also, while this particular transformation code doesn’t have many conditionals, so there probably aren’t too many edge cases… **what are the edge cases**? And what if this code did have a number of conditionals? **When will we have tested enough to have confidence that this code works across anything we’re likely to throw at it, not just a few examples?**
@@ -56,10 +56,10 @@ But what’s a property-based test? First, here’s an example (without boilerpl
 
 ```python
 def test_right_number_products(example):
-    lengths = [len(values) for values in example.values()]
-    number_expected = reduce(mul, lengths, 1) # product of all lengths
-    transformed = combos(example)
-    assert len(transformed) == number_expected
+  lengths = [len(values) for values in example.values()]
+  number_expected = reduce(mul, lengths, 1) # product of all lengths
+  transformed = combos(example)
+  assert len(transformed) == number_expected
 ```
 
 Okay, so this test takes in some example data (don’t worry about that yet, except to know it will be data structured like in “boop”), then it finds how long each of the value lists is, then it multiplies those numbers together, and checks that the number of values in the output of combos(example) is the same as the product. Stepping back a little, this is a property any correctly implemented combos function must have, no matter what data is provided, since a list of dictionaries containing the products of all category values must have the same number of dictionaries as there are products (seems almost silly to explain it in that much detail, right? Good property-based tests are often about finding those obviously-correct things).
@@ -77,7 +77,7 @@ categories = dictionaries(keys, lists(values, min_size=1, max_size=10, unique=Tr
 
 @given(categories)
 def test_right_number_products(example):
-    …
+  …
 ```
 
 Start from the bottom. @given(categories) tells hypothesis this is a test to generate values for, and it should make the argument’s values using the generator named categories.
@@ -97,22 +97,22 @@ Luckily, working up a generator for values like you need comes with dividends: y
 ```python
 @given(categories)
 def test_all_values_unique(example):
-    transformed = combos(example)
-    uniques = frozenset(tuple(value.items()) for value in transformed)
-    assert len(transformed) == len(uniques)
+  transformed = combos(example)
+  uniques = frozenset(tuple(value.items()) for value in transformed)
+  assert len(transformed) == len(uniques)
 
 @given(categories)
 def test_all_values_present(example):
-    transformed = combos(example)
-    for key, expected_values in example.items():
-        transformed_values = frozenset(item[key] for item in transformed)
-        assert frozenset(expected_values) == transformed_values
+  transformed = combos(example)
+  for key, expected_values in example.items():
+    transformed_values = frozenset(item[key] for item in transformed)
+    assert frozenset(expected_values) == transformed_values
 
 @given(categories)
 def test_all_keys_present(example):
-    transformed = combos(example)
-    for product_dictionary in transformed:
-        assert product_dictionary.keys() == example.keys()
+  transformed = combos(example)
+  for product_dictionary in transformed:
+    assert product_dictionary.keys() == example.keys()
 ```
 
 With these tests, we verify that, in addition to having the right number of dictionaries in the list from the first test, every dictionary in the list is unique, all values for each original key are present as values of that key in the output (and vice versa), and every dictionary in the list has the same keys as the original dictionary. What gets really interesting is, we’re starting to reach a place where **it is hard to imagine any code that passes those tests and is not correct**. That’s powerful! A small number of property-based can be **more readable**, **more verifiable**, and instill **more confidence** code works than a much larger number of unit tests with numerous handwritten example values.
@@ -128,14 +128,14 @@ import itertools
 
 
 def pairs(category):
-    key, values = category
-    return ((key, value) for value in values)
+  key, values = category
+  return ((key, value) for value in values)
 
 
 def combos(categories):
-    category_pairs = (pairs(category) for category in categories.items())
-    pair_combos = itertools.product(*category_pairs)
-    return [dict(combo) for combo in pair_combos]
+  category_pairs = (pairs(category) for category in categories.items())
+  pair_combos = itertools.product(*category_pairs)
+  return [dict(combo) for combo in pair_combos]
 ```
 
 ```python
@@ -155,30 +155,30 @@ categories = dictionaries(keys, lists(values, min_size=1, max_size=10, unique=Tr
 
 @given(categories)
 def test_right_number_products(example):
-    lengths = [len(values) for values in example.values()]
-    number_expected = reduce(mul, lengths, 1)  # product of all lengths
-    transformed = combos(example)
-    assert len(transformed) == number_expected
+  lengths = [len(values) for values in example.values()]
+  number_expected = reduce(mul, lengths, 1)  # product of all lengths
+  transformed = combos(example)
+  assert len(transformed) == number_expected
 
 
 @given(categories)
 def test_all_values_unique(example):
-    transformed = combos(example)
-    uniques = frozenset(tuple(value.items()) for value in transformed)
-    assert len(transformed) == len(uniques)
+  transformed = combos(example)
+  uniques = frozenset(tuple(value.items()) for value in transformed)
+  assert len(transformed) == len(uniques)
 
 
 @given(categories)
 def test_all_values_present(example):
-    transformed = combos(example)
-    for key, expected_values in example.items():
-        transformed_values = frozenset(item[key] for item in transformed)
-        assert frozenset(expected_values) == transformed_values
+  transformed = combos(example)
+  for key, expected_values in example.items():
+    transformed_values = frozenset(item[key] for item in transformed)
+    assert frozenset(expected_values) == transformed_values
 
 
 @given(categories)
 def test_all_keys_present(example):
-    transformed = combos(example)
-    for product_dictionary in transformed:
-        assert product_dictionary.keys() == example.keys()
+  transformed = combos(example)
+  for product_dictionary in transformed:
+    assert product_dictionary.keys() == example.keys()
 ```

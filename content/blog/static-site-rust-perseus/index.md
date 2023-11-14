@@ -31,11 +31,11 @@ this on.
 
 ```rust
  Template::build("post")
-    .build_paths_fn(get_build_paths)
-    .build_state_fn(get_build_state)
-    .view_with_state(post_page)
-    .head_with_state(head)
-    .build()
+  .build_paths_fn(get_build_paths)
+  .build_state_fn(get_build_state)
+  .view_with_state(post_page)
+  .head_with_state(head)
+  .build()
 ```
 
 And here's what each part of the template does.
@@ -48,7 +48,7 @@ First, I define the base path I'm building here. Side-note: `index` is special, 
 In this example, the base path in the URL will be `/post`.
 
 ```rust
-    .build_paths_fn(get_build_paths)
+  .build_paths_fn(get_build_paths)
 ```
 
 Next, I define all the sub-paths that will happen. To do this I wrote a function I named `get_build_paths`,
@@ -59,7 +59,7 @@ typical Rust code for reading from the file system.
 
 
 ```rust
-    .build_state_fn(get_build_state)
+  .build_state_fn(get_build_state)
 ```
 
 For each sub-path, we need to know what will go on the page--the initial state. I wrote a function named `get_build_state`,
@@ -69,10 +69,10 @@ from the markdown header like the title and date. Here's the data structure it r
 
 ```rust
 pub struct Post {
-    pub title: String,
-    pub date: chrono::DateTime<FixedOffset>,
-    pub html: String,
-    pub path: String,
+  pub title: String,
+  pub date: chrono::DateTime<FixedOffset>,
+  pub html: String,
+  pub path: String,
 }
 ```
 
@@ -84,8 +84,8 @@ and then the page would change, all in the browser.
 
 
 ```rust
-    .view_with_state(post_page)
-    .head_with_state(head)
+  .view_with_state(post_page)
+  .head_with_state(head)
 ```
 
 Both `post_page` and `head` are functions I wrote, which control what the page will look like. They're separated
@@ -98,18 +98,18 @@ details of how Rust works. Here's the `post_page` for this very page.
 ```rust
 #[auto_scope]
 fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
-    view! { cx,
-        div {
-            h6 { a(href="/") { "home" }}
-            h1 { (state.title.get()) }
-            div(
-                dangerously_set_inner_html = &state.html.get()
-            )
-            h6 { a(href="/") { "home" }}
-            script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js")
-            script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js")
-        }
+  view! { cx,
+    div {
+      h6 { a(href="/") { "home" }}
+      h1 { (state.title.get()) }
+      div(
+        dangerously_set_inner_html = &state.html.get()
+      )
+      h6 { a(href="/") { "home" }}
+      script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js")
+      script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js")
     }
+  }
 }
 ```
 

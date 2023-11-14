@@ -11,8 +11,8 @@ If you're making a Perseus site designed for static export, instead of
 ```rust
 #[perseus::main(perseus_axum::dflt_server)]
 pub fn main<G: Html>() -> PerseusApp<G> {
-    PerseusApp::new()
-        ...
+  PerseusApp::new()
+    ...
 }
 ```
 
@@ -21,8 +21,8 @@ use `main_export`, so it looks like
 ```rust
 #[perseus::main_export]
 pub fn main<G: Html>() -> PerseusApp<G> {
-    PerseusApp::new()
-        ...
+  PerseusApp::new()
+    ...
 }
 ```
 

@@ -22,8 +22,8 @@ Given a data structure like…
 
 ```python
 boop = {
-    “hello”: [1, 2, 3],
-    “bye”: [4, 5, 6]
+  “hello”: [1, 2, 3],
+  “bye”: [4, 5, 6]
 }
 ```
 
@@ -31,15 +31,15 @@ How do we transform that to a data structure like…
 
 ```python
 beep = [
-    {“hello”: 1, “bye”: 4},
-    {“hello”: 1, “bye”: 5},
-    {“hello”: 1, “bye”: 6},
-    {“hello”: 2, “bye”: 4},
-    {“hello”: 2, “bye”: 5},
-    {“hello”: 2, “bye”: 6},
-    {“hello”: 3, “bye”: 4},
-    {“hello”: 3, “bye”: 5},
-    {“hello”: 3, “bye”: 6}
+  {“hello”: 1, “bye”: 4},
+  {“hello”: 1, “bye”: 5},
+  {“hello”: 1, “bye”: 6},
+  {“hello”: 2, “bye”: 4},
+  {“hello”: 2, “bye”: 5},
+  {“hello”: 2, “bye”: 6},
+  {“hello”: 3, “bye”: 4},
+  {“hello”: 3, “bye”: 5},
+  {“hello”: 3, “bye”: 6}
 ]
 ```
 
@@ -63,10 +63,10 @@ I know I need to make dictionaries, and there are two main ways I like to do tha
 
 ```python
 [
-    dict(something) for something in
-    itertools.product(
-        ….something in here using the stuff I wrote above…
-    )
+  dict(something) for something in
+  itertools.product(
+    ….something in here using the stuff I wrote above…
+  )
 ]
 ```
 
@@ -140,46 +140,46 @@ First, time to return to names. We’re going to be making this a function (**fu
 
 ```python
 def combos(categories):
-    return ...(see above)...
+  return ...(see above)...
 ```
 
 Next, time to break it up. One rule I have is, **I do not like reading nested comprehensions**, so I’ll start there. I do like comprehensions that look like: `[func(thing) for thing in things]`, so if I can come up with an understandable function to make the inner comprehension, I can use that construct. What does that function do? It turns a key and multiple values into a bunch of pairs. Not the worst idea for a function name:
 
 ```python
 def pairs(key, values):
-    return ((key, value) for value in values)
+  return ((key, value) for value in values)
 ```
 
 Not too bad, but this is not a totally general function for making pairs. It works for a pretty specific situation. At least, **when I look at the function signature I don’t immediately know** how pairs would be made for a single key and some values. (I ask myself this sort of question a lot when writing code. ) Rather, it makes the pairs we need for categories. So, maybe this way of writing it?
 
 ```python
 def pairs(category):
-    key, values = category
-    return ((key, value) for value in values)
+  key, values = category
+  return ((key, value) for value in values)
 ```
 
 Now the signature tells me this is pairs for a category, and I can see right below that a category is a key and some values, and how we turn those into pairs. That’s also convenient for where we’re calling it, isolating the unpacking inside the function:
 
 ```python
 def combos(categories):
-    return [dict(something) for something in itertools.product(*(pairs(category) for category in categories.items()))]
+  return [dict(something) for something in itertools.product(*(pairs(category) for category in categories.items()))]
 ```
 
 That line is way too long and complex to read, what should we pull out? Another kinda-rule I have is, **I like using \* to expand arguments that are variables** instead of larger expressions. That and a little thought on naming leads to:
 
 ```python
 def combos(categories):
-    category_pairs = (pairs(category) for category in categories.items())
-    return [dict(something) for something in itertools.product(*category_pairs)]
+  category_pairs = (pairs(category) for category in categories.items())
+  return [dict(something) for something in itertools.product(*category_pairs)]
 ```
 
 Hmm, I could stop there, but itertools.product(), **the workhorse function, which is key to understanding how this function works, is a bit buried**, plus that last line is still a bit complicated for readability. Maybe…
 
 ```python
 def combos(categories):
-    category_pairs = (pairs(category) for category in categories.items())
-    pair_combos = itertools.product(*category_pairs)
-    return [dict(combo) for combo in pair_combos]
+  category_pairs = (pairs(category) for category in categories.items())
+  pair_combos = itertools.product(*category_pairs)
+  return [dict(combo) for combo in pair_combos]
 ```
 
 And there we go, that’s the solution I sent. In full:
@@ -189,14 +189,14 @@ import itertools
 
 
 def pairs(category):
-    key, values = category
-    return ((key, value) for value in values)
+  key, values = category
+  return ((key, value) for value in values)
 
 
 def combos(categories):
-    category_pairs = (pairs(category) for category in categories.items())
-    pair_combos = itertools.product(*category_pairs)
-    return [dict(combo) for combo in pair_combos]
+  category_pairs = (pairs(category) for category in categories.items())
+  pair_combos = itertools.product(*category_pairs)
+  return [dict(combo) for combo in pair_combos]
 ```
 
 Initially when I wrote this post, I just ended with that, but I thought I might try to sum up a bit. **Writing code is messy for everyone, even if some of us have more experience navigating the mess**. One of my strengths is, I can juggle a lot of mental models in my head — such as what the data will look like at different points. You can see that above, in how I write about assembling all these pieces. This might be your strength too, or you might have different ones that let you slice through this problem in some other way. However you solve a problem, working incrementally, trying pieces out once you get something runnable, and consulting documentation whenever a library doesn’t act like you expect, like I do above, are all great tools in your belt, whether you have fifteen years experience or five months.

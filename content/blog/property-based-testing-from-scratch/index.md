@@ -21,7 +21,7 @@ import datetime
 
 
 def check_age(birthday, today):
-    return birthday + datetime.timedelta(days=365 * 21) <= today
+  return birthday + datetime.timedelta(days=365 * 21) <= today
 ```
 This does not look that bad. I mean, it isn’t right, and if you’ve done much with calendars you can probably point at a likely problem area (leap years), but this seems like a great starting point. Time to write some tests! Maybe a few simple ones to get started…
 
@@ -32,20 +32,20 @@ from agecheck import check_age
 
 
 def test_allows_old_enough():
-    birthday = datetime.date(1990, 5, 15)
-    today = datetime.date(2017, 1, 1)
-    assert check_age(birthday, today)
+  birthday = datetime.date(1990, 5, 15)
+  today = datetime.date(2017, 1, 1)
+  assert check_age(birthday, today)
 
 
 def test_forbids_too_young():
-    birthday = datetime.date(1990, 5, 15)
-    today = datetime.date(2000, 1, 1)
-    assert not check_age(birthday, today)
+  birthday = datetime.date(1990, 5, 15)
+  today = datetime.date(2000, 1, 1)
+  assert not check_age(birthday, today)
 
 
 if __name__ == '__main__':
-    test_allows_old_enough()
-    test_forbids_too_young()
+  test_allows_old_enough()
+  test_forbids_too_young()
 ```
 
 I’m not using any testing framework at all, but of course you should. What I’m trying to do here is introduce the idea of property-based testing completely from scratch, so all this code runs without installing a single library. I’m not using the built-in unittest framework both to avoid boilerplate and because it doesn’t look much like future code will, with the libraries pytest and hypothesis. Just put all the files in the same directory and run the test file to run the tests.
@@ -64,11 +64,11 @@ import datetime
 
 
 def check_age(birthday, today):
-    return twenty_first(birthday) <= today
+  return twenty_first(birthday) <= today
 
 
 def twenty_first(birthday):
-    return birthday + datetime.timedelta(days=365 * 21)
+  return birthday + datetime.timedelta(days=365 * 21)
 ```
 
 Now how about we write another test…
@@ -80,12 +80,12 @@ from agecheck import twenty_first
 
 
 def test_twenty_first_same_month():
-    birthday = datetime.date(1990, 3, 6)
-    assert birthday.month == twenty_first(birthday).month
+  birthday = datetime.date(1990, 3, 6)
+  assert birthday.month == twenty_first(birthday).month
 
 
 if __name__ == '__main__':
-    test_twenty_first_same_month()
+  test_twenty_first_same_month()
 ```
 Not bad, not bad… but how many of those do we need to write to really check this property? Also, are we writing them for the right dates? How is this better than just writing more of the sorts of tests we started with?
 
@@ -111,12 +111,12 @@ from agecheck import twenty_first
 # the property we've identified, being in the same month, for each of them.
 
 def test_must_be_in_same_month():
-    # Okay to check lots, because our assert will stop us at the first problem
-    for ii in range(10000):
-        birthday = random_day()
-        error_message = """{} doesn't have the right twentyfirst birthday!
-            Instead it has {}""".format(birthday, twenty_first(birthday))
-        assert birthday.month == twenty_first(birthday).month, error_message
+  # Okay to check lots, because our assert will stop us at the first problem
+  for ii in range(10000):
+    birthday = random_day()
+    error_message = """{} doesn't have the right twentyfirst birthday!
+      Instead it has {}""".format(birthday, twenty_first(birthday))
+    assert birthday.month == twenty_first(birthday).month, error_message
 
 
 # Generators! These help us make what we'll use in our tests.
@@ -124,27 +124,27 @@ def test_must_be_in_same_month():
 # a generator for them.
 
 def random_day():
-    date_min = datetime.date(1970, 1, 1)
-    date_max = datetime.date(2037, 12, 31)
-    random_posix_time = random.randrange(to_posix(date_min), to_posix(date_max))
-    return from_posix(random_posix_time)
+  date_min = datetime.date(1970, 1, 1)
+  date_max = datetime.date(2037, 12, 31)
+  random_posix_time = random.randrange(to_posix(date_min), to_posix(date_max))
+  return from_posix(random_posix_time)
 
 
 def from_posix(seconds):
-    return datetime.date.fromtimestamp(seconds)
+  return datetime.date.fromtimestamp(seconds)
 
 
 def to_posix(date):
-    return time.mktime(date.timetuple())
+  return time.mktime(date.timetuple())
 
 
 if __name__ == '__main__':
-    test_must_be_in_same_month()
+  test_must_be_in_same_month()
 ```
 Okay, go ahead and run it, and right away you will probably see something like
 
-    > AssertionError: 2013–11–04 23:16:23 doesn’t have the right twentyfirst birthday!
-    > Instead it has 2034–10–30 23:16:23
+  > AssertionError: 2013–11–04 23:16:23 doesn’t have the right twentyfirst birthday!
+  > Instead it has 2034–10–30 23:16:23
 
 Oh! That’s exactly the leap year thing we were worried about.
 
@@ -155,16 +155,16 @@ import datetime
 
 
 def check_age(birthday, today):
-    return twenty_first(birthday) <= today
+  return twenty_first(birthday) <= today
 
 
 def twenty_first(birthday):
-    return birthday + datetime.timedelta(days=365 * 21 + 5)
+  return birthday + datetime.timedelta(days=365 * 21 + 5)
 ```
 Rerun the test with the modification, and… oh. Hmm. You probably see something like
 
-    > AssertionError: 2035–10–01 01:31:12 doesn’t have the right twentyfirst birthday!
-    > Instead it has 2056–09–30 01:31:12
+  > AssertionError: 2035–10–01 01:31:12 doesn’t have the right twentyfirst birthday!
+  > Instead it has 2056–09–30 01:31:12
 
 Run it a few times more and you’ll probably notice a common pattern. The most frequent problem you’ll see is when a birthday is on the 1st of a month, but for some reason the 21st birthday is being put on the end of the previous month. What’s going on? We can’t just add a sixth day (try it, you’ll see lots of failures for a birthday at the end of the month leading to a 21st birthday on the 1st of the next month).
 
@@ -197,21 +197,21 @@ import calendar
 
 
 def check_age(birthday, today):
-    return twenty_first(birthday) <= today
+  return twenty_first(birthday) <= today
 
 
 def twenty_first(birthday):
-    leapdays = calendar.leapdays(birthday.year, birthday.year + 22)  # [first, second)
-    if calendar.isleap(birthday.year) and birthday.month > 2:
-        leapdays -= 1
-    elif calendar.isleap(birthday.year + 1) and birthday.month < 3:
-        leapdays -= 1
-    return birthday + datetime.timedelta(days=365 * 21 + leapdays)
+  leapdays = calendar.leapdays(birthday.year, birthday.year + 22)  # [first, second)
+  if calendar.isleap(birthday.year) and birthday.month > 2:
+    leapdays -= 1
+  elif calendar.isleap(birthday.year + 1) and birthday.month < 3:
+    leapdays -= 1
+  return birthday + datetime.timedelta(days=365 * 21 + leapdays)
 ```
 That logic probably makes a lot of sense if you think about it. What’s more, if you just keep making sensible modifications to make specific failures work, you’ll arrive at it naturally. Now run the test again… huh, still getting an error. Run it a few times and you’ll see that the error keeps looking very similar, something like
 
-    > AssertionError: 2024–02–29 00:19:05 doesn’t have the right twentyfirst birthday!
-    > Instead it has 2045–03–01 00:19:05
+  > AssertionError: 2024–02–29 00:19:05 doesn’t have the right twentyfirst birthday!
+  > Instead it has 2045–03–01 00:19:05
 
 Wait, when does the 21st birthday for someone born _on_ a leap day occur? In a real life situation, you’d figure out what legal standard matters for your company. Now, since it turns out in practice this is mostly not handled by the law, we’re just going to make an arbitrary decision: in non-leap years, the birthday for someone born February 29th is February 28th. Add that logic and our code looks like
 
@@ -222,17 +222,17 @@ import calendar
 
 
 def check_age(birthday, today):
-    return twenty_first(birthday) <= today
+  return twenty_first(birthday) <= today
 
 
 def twenty_first(birthday):
-    leapdays = calendar.leapdays(birthday.year, birthday.year + 22)  # [first, second)
-    if calendar.isleap(birthday.year):
-        if birthday.month > 2 or (birthday.month == 2 and birthday.day == 29):
-            leapdays -= 1
-    elif calendar.isleap(birthday.year + 1) and birthday.month < 3:
-        leapdays -= 1
-    return birthday + datetime.timedelta(days=365 * 21 + leapdays)
+  leapdays = calendar.leapdays(birthday.year, birthday.year + 22)  # [first, second)
+  if calendar.isleap(birthday.year):
+    if birthday.month > 2 or (birthday.month == 2 and birthday.day == 29):
+      leapdays -= 1
+  elif calendar.isleap(birthday.year + 1) and birthday.month < 3:
+    leapdays -= 1
+  return birthday + datetime.timedelta(days=365 * 21 + leapdays)
 ```
 Run the property-based test again and… no errors! One interesting thing here is, the property-based test never changed, and yet it uncovered many errors. Also, while it might seem like there was a lot of code to make the property-based test, most of it is reusable. Another interesting thing is that, even though we only checked one simple property and focused on making that property work correctly, the final code that passed the property-based test does everything right. To understand how that’s possible we’ll dive into the test and explain all the different parts.
 
@@ -250,12 +250,12 @@ from agecheck import twenty_first
 # the property we've identified, being in the same month, for each of them.
 
 def test_must_be_in_same_month():
-    # Okay to check lots, because our assert will stop us at the first problem
-    for ii in range(10000):
-        birthday = random_day()
-        error_message = """{} doesn't have the right twentyfirst birthday!
-            Instead it has {}""".format(birthday, twenty_first(birthday))
-        assert birthday.month == twenty_first(birthday).month, error_message
+  # Okay to check lots, because our assert will stop us at the first problem
+  for ii in range(10000):
+    birthday = random_day()
+    error_message = """{} doesn't have the right twentyfirst birthday!
+      Instead it has {}""".format(birthday, twenty_first(birthday))
+    assert birthday.month == twenty_first(birthday).month, error_message
 
 
 # Generators! These help us make what we'll use in our tests.
@@ -263,22 +263,22 @@ def test_must_be_in_same_month():
 # a generator for them.
 
 def random_day():
-    date_min = datetime.date(1970, 1, 1)
-    date_max = datetime.date(2037, 12, 31)
-    random_posix_time = random.randrange(to_posix(date_min), to_posix(date_max))
-    return from_posix(random_posix_time)
+  date_min = datetime.date(1970, 1, 1)
+  date_max = datetime.date(2037, 12, 31)
+  random_posix_time = random.randrange(to_posix(date_min), to_posix(date_max))
+  return from_posix(random_posix_time)
 
 
 def from_posix(seconds):
-    return datetime.date.fromtimestamp(seconds)
+  return datetime.date.fromtimestamp(seconds)
 
 
 def to_posix(date):
-    return time.mktime(date.timetuple())
+  return time.mktime(date.timetuple())
 
 
 if __name__ == '__main__':
-    test_must_be_in_same_month()
+  test_must_be_in_same_month()
 ```
 The test code looks a lot like any test, but there are some key differences that let it do a lot more than a typical test. Notice that the first thing in the test is a big loop. We aren’t testing one value, we’re testing ten thousand. Second, we aren’t picking what value we’re testing with, only the kind of value it is — a day. But once we have the value in our birthday variable, the rest looks just like we saw with our first attempt at testing the same month property with a normal unit test: `birthday.month == twenty_first(birthday).month`.
 
@@ -295,9 +295,9 @@ from agecheck import twenty_first
 
 @given(dates())
 def test_must_be_in_same_month(birthday):
-    error_message = """{} doesn't have the right twentyfirst birthday!
-        Instead it has {}""".format(birthday, twenty_first(birthday))
-    assert birthday.month == twenty_first(birthday).month, error_message
+  error_message = """{} doesn't have the right twentyfirst birthday!
+    Instead it has {}""".format(birthday, twenty_first(birthday))
+  assert birthday.month == twenty_first(birthday).month, error_message
 ```
 That’s much _shorter_ than our non-property-based tests, and helps us vastly more! Of course, this is an example I specifically chose to show off what property-based testing is capable of. In many cases you have to write your own generators, and that can get very complex. But once you’ve written them, you can reuse them across many tests, and the payoff from even a single property-based test can be enormous.
 
