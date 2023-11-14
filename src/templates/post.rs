@@ -15,6 +15,7 @@ fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
             )
             h6 { a(href="/") { "home" }}
             script(defer=true, src="https://app.tinyanalytics.io/pixel/MB6jAtnTO5M0SZ9n")
+            script(defer=true, src="https://plausible.io/js/script.js", data-domain="russellduhon.com" )
             script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js")
             script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js")
         }
