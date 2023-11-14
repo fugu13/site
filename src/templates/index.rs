@@ -61,6 +61,7 @@ fn head(cx: Scope) -> View<SsrNode> {
         title { "Russell Duhon" }
         link(rel="stylesheet", href="https://unpkg.com/sakura.css/css/sakura.css", media="screen")
         link(rel="stylesheet", href=".perseus/static/extra.css")
+        script(defer=true, src="https://app.tinyanalytics.io/pixel/MB6jAtnTO5M0SZ9n")
     }
 }
 

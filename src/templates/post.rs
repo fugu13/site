@@ -14,6 +14,7 @@ fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
                 dangerously_set_inner_html = &state.html.get()
             )
             h6 { a(href="/") { "home" }}
+            script(defer=true, src="https://app.tinyanalytics.io/pixel/MB6jAtnTO5M0SZ9n")
             script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js")
             script(src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js")
         }
@@ -23,7 +24,9 @@ fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
 #[engine_only_fn]
 fn head(cx: Scope, post: Post) -> View<SsrNode> {
     let full_title = format!("{} by Russell Duhon", &post.title);
-    let full_image_url = post.image.map(|url| format!("{}/{}", get_path_prefix_server(), url));
+    let full_image_url = post
+        .image
+        .map(|url| format!("{}/{}", get_path_prefix_server(), url));
     view! { cx,
         title { (post.title) }
         meta(property="og:title", content=full_title)
