@@ -122,7 +122,8 @@ the same except you use `.get()` to enable the reactivity.
 
 There're a number of other details, which you can read about on the Perseus website and in the Perseus book,
 but the above covers most of the code I had to write for generating this very page. If you want to see _all_
-the code for generating this page, the entire site's code is public at https://github.com/fugu13/site.
+the code for generating this page, the entire site's code is public at
+[https://github.com/fugu13/site](https://github.com/fugu13/site).
 
 Since I only need build-time and client-side rendering for my site (in other words, I'm generating a static site that's nothing but
 HTML and Javascript and WebAssembly), I can export it and put it on a static site host, using the command
