@@ -1,8 +1,0 @@
-p a {
-    text-decoration: underline;
-    text-decoration-color: gray;
-}
-
-p a:hover {
-    text-decoration: none;
-}
