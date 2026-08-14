@@ -1,5 +1,24 @@
-# Russell's Personal Site
+# Russell Duhon's Blog
 
-This is the repository for https://russellduhon.com, written in Rust using Perseus.
+Source for https://www.russellduhon.com — a personal blog: a home page listing posts and one page per post, generated from Markdown files in `articles/`.
 
-See the site for blog entries about building the site.
+The site is built by a from-scratch, Leptos-0.8-ssr-only static generator: Leptos is used purely as a build-time HTML templating engine (no hydration, no WebAssembly ships to production). `make build` prerenders every route to plain static HTML and CSS in `dist/`, which a GitHub Actions workflow deploys to GitHub Pages.
+
+## Build & Run
+
+| Command | Action |
+|---|---|
+| `make build` | Prerender the site to `dist/` — the deployable artifact |
+| `make serve` | Serve the prerendered `dist/` the way a static host would |
+| `make dev` | `build`, then `serve`; re-run to pick up changes |
+| `make lint` | Run clippy (deny warnings) and check formatting |
+| `make fmt` | Auto-format the code |
+
+## Documentation
+
+| File | Purpose |
+|---|---|
+| [CLAUDE.md](CLAUDE.md) | Development conventions |
+| [TODO.md](TODO.md) | Tracked work items |
+| [BUGHISTORY.md](BUGHISTORY.md) | Resolved bugs with reoccurrence checks |
+| [docs/architecture.md](docs/architecture.md) | Site-generation architecture |

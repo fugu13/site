@@ -13,7 +13,7 @@ Writing HTML-returning SQL isn't easy, because databases don't have good text fo
 you can use the [minijinja](https://github.com/mitsuhiko/minijinja) library, which is almost the same template syntax as the widely used Jinja2 and has
 excellent error messages.
 
-![a very simple HTML example](.perseus/static/html.jpg)
+![a very simple HTML example](/html.jpg)
 
 First, you'll need to connect with `psql` to a PostgreSQL instance supporting PL/Rust. One easy way to do that is
 Omnigres, following the quick start at https://docs.omnigres.org/quick_start/. This post doesn't use any

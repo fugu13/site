@@ -9,7 +9,7 @@ one called [Perseus](https://framesurge.sh/perseus/en-US/), which is written in 
 can also do non-static site generation, because it gives me a chance to practice Rust, and because it focuses on
 doing things that make for really fast sites while letting me pretty much do what I want with the content.
 
-![sculpture of medusa's head](.perseus/static/medusa.jpg)
+![sculpture of medusa's head](/medusa.jpg)
 
 ## Basics
 

@@ -6,7 +6,7 @@ description: Writing a property-based test with no framework to understand how t
 
 Using a single, short property-based test written without a framework to guide the development of a tricky piece of date logic involving leap years.
 
-![a record being scratched](.perseus/static/record.png)
+![a record being scratched](/record.png)
 
 _(This post is based on the first chapter of a book I’m working on to introduce property-based testing for practical application. It originally appeared on Medium, but I've moved it over to my personal site.)_
 

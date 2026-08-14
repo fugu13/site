@@ -19,7 +19,7 @@ Fastly and Cloudflare.
 
 Why is it such a big deal?
 
-![an old wooden waterwheel](.perseus/static/waterwheel.jpg)
+![an old wooden waterwheel](/waterwheel.jpg)
 
 
 ### A brief "what"

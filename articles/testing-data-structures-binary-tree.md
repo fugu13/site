@@ -24,7 +24,7 @@ asked a question I like a lot more: **how would you test the implementation?**
 
 That's what this blog post explores.
 
-![an example binary tree](.perseus/static/binarytree.png)
+![an example binary tree](/binarytree.png)
 
 
 ### A simple implementation

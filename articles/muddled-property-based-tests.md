@@ -6,7 +6,7 @@ description: Writing really really good tests for a real world data transformati
 
 I solved a data transformation problem Pythonically, but there were no tests! Here’s how I might test it.
 
-![copernican solar diagram](.perseus/static/spheres.png)
+![copernican solar diagram](/spheres.png)
 
 \_(This post originally appeared on Medium, but I've moved it to my personal site.)
 

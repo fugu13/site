@@ -6,7 +6,7 @@ description: I attempt to narrate my thought process solving a data transformati
 
 Solving a data transformation problem Pythonically, explained in far too much detail.
 
-![python powered logo](.perseus/static/python-powered.png)
+![python powered logo](/python-powered.png)
 
 _(To see what tests for all this look like, check out my later post, [Muddled Property-based Tests](/post/muddled-property-based-tests/). This post originally appeared on Medium, but I've moved it to my personal site.)_
 
