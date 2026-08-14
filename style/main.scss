@@ -148,6 +148,13 @@ pre > code {
   font-size: 1em;
 }
 
+/* A11Y-001: an <h2> sized to match the vendored h3 rule above, so a heading
+ * can sit at the correct level in the document outline without changing how
+ * it looks. Keep in sync with the h3 rule's font-size if that ever changes. */
+.h3-size {
+  font-size: 1.75em;
+}
+
 /* Tables */
 table {
   text-align: justify;

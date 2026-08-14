@@ -12,7 +12,7 @@ pub fn HomePage() -> impl IntoView {
                 <a href="https://www.linkedin.com/in/russell-duhon-322a0244">"hire me"</a>
                 "."
             </p>
-            <h3>"Blog"</h3>
+            <h2 class="h3-size">"Blog"</h2>
             {crate::posts::all()
                 .iter()
                 .map(|post| {
