@@ -69,6 +69,10 @@ fn compile_stylesheet(source: &Path, dist: &Path) -> Result<String, Box<dyn Erro
 /// for cache busting — collision resistance and stability across Rust
 /// versions don't matter here, only that the same content hashes the same
 /// way within one `prerender` run and changed content hashes differently.
+#[allow(
+    clippy::cast_possible_truncation,
+    reason = "deliberately keeping only the low 32 bits of the hash for a short filename fragment"
+)]
 fn content_hash(bytes: &[u8]) -> String {
     let mut hasher = DefaultHasher::new();
     bytes.hash(&mut hasher);

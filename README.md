@@ -11,8 +11,9 @@ The site is built by a from-scratch, Leptos-0.8-ssr-only static generator: Lepto
 | `make build` | Prerender the site to `dist/` — the deployable artifact |
 | `make serve` | Serve the prerendered `dist/` the way a static host would |
 | `make dev` | `build`, then `serve`; re-run to pick up changes |
-| `make lint` | Run clippy (deny warnings) and check formatting |
+| `make lint` | Run clippy (deny warnings), check formatting, and audit dependencies |
 | `make fmt` | Auto-format the code |
+| `make audit` | Check `Cargo.lock` against the RustSec advisory database |
 
 ## Documentation
 

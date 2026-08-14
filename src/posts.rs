@@ -28,9 +28,11 @@ struct FrontMatter {
 
 static POSTS: OnceLock<Vec<Post>> = OnceLock::new();
 
-/// Every post, newest first. Parsed once and cached; a post that fails to parse is a
-/// build-time bug, so this panics rather than threading a `Result` through every call
-/// site — use [`load`] directly if you need to handle the error yourself.
+/// Every post, newest first.
+///
+/// Parsed once and cached; a post that fails to parse is a build-time bug,
+/// so this panics rather than threading a `Result` through every call site —
+/// use [`load`] directly if you need to handle the error yourself.
 pub fn all() -> &'static [Post] {
     POSTS
         .get_or_init(|| load().unwrap_or_else(|err| panic!("{err}")))

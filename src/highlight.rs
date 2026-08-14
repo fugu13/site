@@ -31,12 +31,14 @@ fn highlight_with_syntax(code: &str, syntax: &SyntaxReference) -> Option<String>
     Some(generator.finalize())
 }
 
-/// Highlight a fenced code block tagged with `lang`, resolving common
-/// aliases (e.g. "py" / "python", "rs" / "rust", and "sql" itself — extension
-/// lookup happens before name lookup, so this covers plain-extension
-/// languages like SQL too, with no per-language special-casing needed).
-/// Returns `None` if the language isn't recognized or a line fails to parse,
-/// leaving the escape-and-wrap fallback to the caller.
+/// Highlight a fenced code block tagged with `lang`.
+///
+/// Resolves common aliases (e.g. "py" / "python", "rs" / "rust", and "sql"
+/// itself — extension lookup happens before name lookup, so this covers
+/// plain-extension languages like SQL too, with no per-language
+/// special-casing needed). Returns `None` if the language isn't recognized
+/// or a line fails to parse, leaving the escape-and-wrap fallback to the
+/// caller.
 pub fn fenced(lang: &str, code: &str) -> Option<String> {
     let syntax = syntax_set().find_syntax_by_token(lang)?;
     highlight_with_syntax(code, syntax)

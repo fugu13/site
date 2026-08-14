@@ -16,8 +16,9 @@
 | `make build` | Prerenders every route to `dist/` — the deployable artifact |
 | `make serve` | Serves `dist/` the way the production static host does, including a real HTTP 404 status |
 | `make dev` | `build`, then `serve`; re-run to pick up edits |
-| `make lint` | `cargo clippy --all-targets -- -D warnings`, then `cargo fmt -- --check` |
+| `make lint` | `make audit`, then `cargo clippy --all-targets -- -D warnings`, then `cargo fmt -- --check` |
 | `make fmt` | `cargo fmt` |
+| `make audit` | `cargo audit` — fails only on an actual RustSec vulnerability advisory, not on "unmaintained" warnings |
 | `make clean` | Removes `target/` and `dist/` |
 
 CI (`.github/workflows/deploy.yml`) runs `make lint` then `make build` on every push and pull request, then independently re-verifies `dist/` (see Conventions).
@@ -35,6 +36,11 @@ See `docs/architecture.md` for the full build pipeline and route structure.
 - **Fenced code blocks stay bare `<pre><code>`.** No wrapping `<div>`, no `role`/`tabindex`. See `TODO.md` (A11Y-002) for the accessibility gap this leaves and why it wasn't closed during the migration.
 - **Accessibility is a default, not something weighed case by case.** New UI work should not introduce accessibility gaps even though two pre-existing ones (`TODO.md`, A11Y-001 and A11Y-002) are tracked as deliberately out of scope for the Perseus-to-Leptos migration — that migration was scoped to preserve the site's existing DOM shape and layout, not to improve or regress it.
 - **Error handling:** no `unwrap()`, `expect()`, or `panic!()` outside test code for data that could plausibly be malformed. The exception is a genuinely unrecoverable build/dev-tool condition, where panicking immediately with a clear message beats threading a `Result` through every call site — e.g. `posts::all` on a malformed article, `assets::set_stylesheet_path` on being read before it's set, and `serve`'s local preview server failing to bind its port. Any new panic in non-test code needs the same bar, and should be documented at the call site the way these are.
+- **Lint baseline: clippy `pedantic` + `nursery`, both warn-level, `-D warnings` in CI** (`Cargo.toml`'s `[lints.clippy]`). A handful of lints are allowed project-wide, each with a one-line reason in `Cargo.toml`; a lint that fires somewhere that reason doesn't cover should get fixed there, not silenced with a new blanket allow. A genuinely one-off false positive gets a local `#[allow(..., reason = "...")]` at the call site instead of a project-wide entry.
+
+## Repository Practices
+
+`main` is a protected branch on GitHub: pushes go through a pull request, the `build` CI check (lint, build, `dist/` verification) must pass before merging, and this is enforced for admins too — there's no direct-push exception, including for the repo owner. Force-pushes and deletion of `main` are disabled. Merged branches are deleted automatically. Dependabot opens weekly, grouped update PRs for both Cargo and GitHub Actions dependencies, and separately raises PRs for any known security advisory; secret scanning and push protection are on. None of this is configured in-repo (it's GitHub repository/branch settings, not a file) — noted here so it doesn't get rediscovered by surprise.
 
 ## Testing
 
