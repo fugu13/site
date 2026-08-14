@@ -23,3 +23,5 @@ The site is built by a from-scratch, Leptos-0.8-ssr-only static generator: Lepto
 | [TODO.md](TODO.md) | Tracked work items |
 | [BUGHISTORY.md](BUGHISTORY.md) | Resolved bugs with reoccurrence checks |
 | [docs/architecture.md](docs/architecture.md) | Site-generation architecture |
+| [docs/ux/code-blocks.md](docs/ux/code-blocks.md) | Keyboard behavior for scrolling wide code samples |
+| [docs/ux/heading-structure.md](docs/ux/heading-structure.md) | Heading hierarchy for screen-reader navigation |

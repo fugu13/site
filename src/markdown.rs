@@ -5,7 +5,8 @@
 //! so straight quotes in source posts are never rewritten to curly ones.
 //!
 //! Fenced code blocks are intercepted and re-emitted as raw HTML, routed
-//! through [`crate::highlight`] for syntax coloring.
+//! through [`crate::highlight`] for syntax coloring, and wrapped in a
+//! focusable scroll region so keyboard users can reach horizontal overflow.
 
 use pulldown_cmark::{CodeBlockKind, CowStr, Event, Options, Parser, Tag, TagEnd};
 
@@ -42,19 +43,21 @@ pub fn to_html(source: &str) -> String {
     html_output
 }
 
-/// Render one fenced code block's inner HTML and wrap it in `<pre><code>`,
-/// per the language-tagging rules described on [`to_html`]'s module docs:
-/// no language at all skips the highlighter entirely and omits the `class`
-/// attribute; a present language always gets the `class`, whether or not
-/// highlighting actually succeeded.
+/// Render one fenced code block's inner HTML, wrap it in `<pre><code>`, and
+/// wrap that in a keyboard-focusable scroll region. Language tagging follows
+/// the rules described on [`to_html`]'s module docs: no language at all
+/// skips the highlighter entirely and omits the `class` attribute; a
+/// present language always gets the `class`, whether or not highlighting
+/// actually succeeded.
 fn render_fenced_block(lang: &str, code: &str) -> String {
-    if lang.is_empty() {
-        return format!("<pre><code>{}</code></pre>", escape_html(code));
-    }
+    let pre = if lang.is_empty() {
+        format!("<pre><code>{}</code></pre>", escape_html(code))
+    } else {
+        let inner = crate::highlight::fenced(lang, code).unwrap_or_else(|| escape_html(code));
+        format!("<pre><code class=\"language-{lang}\">{inner}</code></pre>")
+    };
 
-    let inner = crate::highlight::fenced(lang, code).unwrap_or_else(|| escape_html(code));
-
-    format!("<pre><code class=\"language-{lang}\">{inner}</code></pre>")
+    format!("<div role=\"region\" tabindex=\"0\" aria-label=\"Code sample\">{pre}</div>")
 }
 
 /// Escape the three HTML-significant characters, `&` first so escaping the
@@ -162,11 +165,17 @@ mod tests {
     }
 
     #[test]
-    fn no_extra_wrapping_around_pre() {
+    fn fenced_block_is_wrapped_in_a_focusable_scroll_region() {
+        // A11Y-002: a keyboard-only user needs to be able to scroll a
+        // horizontally overflowing code block into view.
         let html = to_html("```\nplain\n```\n");
         assert!(
-            !html.contains("<div") && !html.contains("role=") && !html.contains("tabindex"),
-            "fenced blocks must not be wrapped: {html}"
+            html.contains("<div role=\"region\" tabindex=\"0\""),
+            "fenced blocks must be wrapped in a focusable scroll region: {html}"
+        );
+        assert!(
+            html.contains("<pre><code>plain\n</code></pre></div>"),
+            "the pre/code element itself must stay unwrapped: {html}"
         );
     }
 }
