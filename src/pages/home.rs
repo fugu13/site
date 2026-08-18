@@ -10,7 +10,7 @@ pub fn HomePage() -> impl IntoView {
             <p>
                 "Traditional sporadic software developer blogging. I'm currently looking for a new position, "
                 <a href="https://www.linkedin.com/in/russell-duhon-322a0244">"hire me"</a>
-                "."
+                ". I am also available for consulting on software design and development, increasing developer productivity on small development teams, and reducing friction between development teams and business teams."
             </p>
             <h2 class="h3-size">"Blog"</h2>
             {crate::posts::all()
