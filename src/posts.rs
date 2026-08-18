@@ -24,6 +24,8 @@ struct FrontMatter {
     description: Option<String>,
     #[serde(default)]
     image: Option<String>,
+    #[serde(default)]
+    draft: bool,
 }
 
 static POSTS: OnceLock<Vec<Post>> = OnceLock::new();
@@ -49,17 +51,22 @@ pub fn slugs() -> Vec<String> {
     all().iter().map(|post| post.slug.clone()).collect()
 }
 
-/// Parse every article embedded from `articles/` into a [`Post`], newest first.
+/// Parse every non-draft article embedded from `articles/` into a [`Post`], newest first.
+///
+/// An article whose front matter sets `draft: true` is skipped entirely — it gets no
+/// route and never appears in [`all`], [`by_slug`], or [`slugs`].
 pub fn load() -> Result<Vec<Post>, String> {
-    let mut posts = ARTICLES
-        .files()
-        .map(parse_post)
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut posts = Vec::new();
+    for file in ARTICLES.files() {
+        if let Some(post) = parse_post(file)? {
+            posts.push(post);
+        }
+    }
     posts.sort_by_key(|post| std::cmp::Reverse(post.date));
     Ok(posts)
 }
 
-fn parse_post(file: &File<'_>) -> Result<Post, String> {
+fn parse_post(file: &File<'_>) -> Result<Option<Post>, String> {
     let path = file.path();
     let name = path.to_string_lossy();
     let slug = path
@@ -69,21 +76,28 @@ fn parse_post(file: &File<'_>) -> Result<Post, String> {
     let source = file
         .contents_utf8()
         .ok_or_else(|| format!("{name}: file is not valid UTF-8"))?;
+    parse_post_source(&name, slug, source)
+}
+
+fn parse_post_source(name: &str, slug: String, source: &str) -> Result<Option<Post>, String> {
     let (front_matter, body) = split_front_matter(source)
         .ok_or_else(|| format!("{name}: missing or malformed YAML front matter"))?;
     let front_matter: FrontMatter = serde_yaml::from_str(front_matter)
         .map_err(|err| format!("{name}: failed to parse front matter: {err}"))?;
+    if front_matter.draft {
+        return Ok(None);
+    }
     let html = crate::markdown::to_html(body);
     let image = front_matter.image.or_else(|| first_src(&html));
 
-    Ok(Post {
+    Ok(Some(Post {
         slug,
         title: front_matter.title,
         date: front_matter.date,
         description: front_matter.description,
         image,
         html,
-    })
+    }))
 }
 
 /// Split `---`-delimited YAML front matter from the remaining Markdown body.
@@ -138,5 +152,22 @@ mod tests {
             .expect("messily-thinking-pythonically.md should be present");
         let image = post.image.as_deref().expect("post should have an image");
         assert!(!image.is_empty());
+    }
+
+    #[test]
+    fn draft_front_matter_excludes_the_post() {
+        let source = "---\ntitle: \"Draft\"\ndate: \"2026-01-01T00:00:00-08:00\"\ndraft: true\n---\n\nBody.\n";
+        let post = parse_post_source("draft.md", "draft".to_string(), source)
+            .expect("front matter should parse");
+        assert!(post.is_none());
+    }
+
+    #[test]
+    fn missing_draft_field_defaults_to_published() {
+        let source =
+            "---\ntitle: \"Published\"\ndate: \"2026-01-01T00:00:00-08:00\"\n---\n\nBody.\n";
+        let post = parse_post_source("post.md", "post".to_string(), source)
+            .expect("front matter should parse");
+        assert!(post.is_some());
     }
 }

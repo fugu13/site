@@ -19,13 +19,15 @@
 | `make lint` | `make audit`, then `cargo clippy --all-targets -- -D warnings`, then `cargo fmt -- --check` |
 | `make fmt` | `cargo fmt` |
 | `make audit` | `cargo audit` — fails only on an actual RustSec vulnerability advisory, not on "unmaintained" warnings |
+| `make draft` | Creates `articles/draft.md`, a timestamped placeholder draft post; refuses to overwrite an existing one |
+| `make blog` | Commits added/updated files under `articles/` and `public/` to a new branch (message auto-generated from which posts changed), pushes it, then builds and previews the site locally. Requires `main` to be checked out and up to date with `origin/main`, so the new branch never carries along unrelated commits |
 | `make clean` | Removes `target/` and `dist/` |
 
 CI (`.github/workflows/deploy.yml`) runs `make lint` then `make build` on every push and pull request, then independently re-verifies `dist/` (see Conventions).
 
 ## Content Model
 
-A blog post is a file in `articles/*.md`: YAML front matter (`title`, `date`, optional `description` and `image`) followed by a `---`-delimited Markdown body. **Adding a post requires no code changes** — drop a new file into `articles/` matching the existing front matter shape, and `make build` picks it up. The slug is the filename stem.
+A blog post is a file in `articles/*.md`: YAML front matter (`title`, `date`, optional `description`, `image`, and `draft`) followed by a `---`-delimited Markdown body. **Adding a post requires no code changes** — drop a new file into `articles/` matching the existing front matter shape, and `make build` picks it up. The slug is the filename stem. A post with `draft: true` is skipped entirely at build time — no route, no home page listing — until the flag is removed; `make draft` scaffolds one, and `make blog` notes draft status in its generated commit message.
 
 See `docs/architecture.md` for the full build pipeline and route structure.
 
