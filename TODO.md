@@ -12,6 +12,22 @@ The home page's heading hierarchy jumped from the page's `<h1>` directly to an `
 
 Long code blocks rendered as bare `<pre><code>` with no wrapping `role="region" tabindex="0"` container, so a horizontally overflowing block couldn't be scrolled into view by a keyboard-only user the way the equivalent code blocks on this author's other project, pgdmn, can. Fixed in `src/markdown.rs` by wrapping every fenced code block's `<pre><code>` in a `<div role="region" tabindex="0" aria-label="Code sample">`.
 
+## SEO
+
+### SEO-001: Twitter card and locale metadata
+
+Pages carry Open Graph tags but no `twitter:card` / `twitter:title` / `twitter:image` tags and no `og:locale`. Most platforms fall back to Open Graph so the impact is small, but X/Twitter renders richer previews with explicit card tags. When adding them, consolidate the per-page head metadata (canonical, description, Open Graph) into one shared component so each page declares its facts once — today the block is hand-repeated in each page template, and a per-page omission is invisible.
+
+## Images
+
+### IMG-001: Explicit dimensions and lazy loading for article images
+
+Images rendered from Markdown carry no `width`/`height` attributes (so the layout shifts as they load) and no `loading="lazy"`/`decoding="async"` hints. Fixing this means reading each image's pixel dimensions at build time and post-processing the rendered `img` tags in `src/markdown.rs`, the way code blocks are already post-processed.
+
+### IMG-002: Modern formats and responsive variants for article images
+
+`public/` holds unoptimized original PNG/JPEG files served at full size to every device. Generate compressed WebP/AVIF versions and responsive `srcset` variants at build time, keeping the originals as the fallback.
+
 ## Blog Authoring
 
 ### BLOG-001: Local preview port is hardcoded in two places

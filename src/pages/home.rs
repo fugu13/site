@@ -1,10 +1,20 @@
 use leptos::prelude::*;
-use leptos_meta::Title;
+use leptos_meta::{Link, Meta, Title};
+
+/// The home page's meta description — the snippet search engines show for it.
+const DESCRIPTION: &str = "Russell Duhon's blog on software development: Rust, property-based testing, PostgreSQL, WebAssembly, and Python.";
 
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
-        <Title text="Russell Duhon"/>
+        <Title text=crate::seo::AUTHOR/>
+        <Link rel="canonical" href=crate::routes::absolute("/")/>
+        <Meta name="description" content=DESCRIPTION/>
+        <Meta property="og:title" content=crate::seo::AUTHOR/>
+        <Meta property="og:type" content="website"/>
+        <Meta property="og:url" content=crate::routes::absolute("/")/>
+        <Meta property="og:description" content=DESCRIPTION/>
+        <Meta property="og:site_name" content=crate::seo::SITE_TITLE/>
         <main>
             <h1>"Russell Duhon"</h1>
             <p>

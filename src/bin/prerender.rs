@@ -37,6 +37,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     nest_html_files(dist)?;
     strip_inert_scripts_in_dir(dist)?;
 
+    for (path, content) in site::seo::machine_outputs(site::posts::all()) {
+        // The paths are URL-space constants; the leading slash comes off to
+        // land each file at dist/'s top level.
+        std::fs::write(dist.join(path.trim_start_matches('/')), content)?;
+    }
+
     std::fs::write(dist.join(".nojekyll"), "")?;
 
     Ok(())
@@ -135,8 +141,9 @@ fn nest_html_files_at(dir: &Path, root: &Path) -> std::io::Result<()> {
 
 /// Recursively strip inert hydration `<script>` elements from every `.html` file under
 /// `dir`, leaving every real (`src`-bearing) script — the site's three analytics
-/// scripts — untouched wherever they appear. The CI workflow independently verifies
-/// that no script's `src` falls outside the three approved analytics domains.
+/// scripts — and every JSON-LD data block untouched wherever they appear. The CI
+/// workflow independently verifies that no script's `src` falls outside the three
+/// approved analytics domains and that no other inline script survives.
 fn strip_inert_scripts_in_dir(dir: &Path) -> std::io::Result<()> {
     for entry in std::fs::read_dir(dir)? {
         let entry = entry?;
@@ -157,11 +164,13 @@ fn strip_inert_scripts_in_dir(dir: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-/// Remove every `<script>...</script>` element whose opening tag has no `src` attribute.
-/// Leptos's own inert hydration bookkeeping is always emitted inline (no `src`); every
-/// real script this site ever loads — its three analytics scripts — always has one.
-/// This deletes the former while preserving the latter verbatim, in whatever order and
-/// position they appear, without having to name specific hosts here.
+/// Remove every `<script>...</script>` element whose opening tag has no `src` attribute,
+/// except `type="application/ld+json"` data blocks — inert structured data for search
+/// engines, deliberately kept even though they are inline (the JSON they carry never
+/// executes). Leptos's own inert hydration bookkeeping is always emitted inline (no
+/// `src`); every real script this site ever loads — its three analytics scripts —
+/// always has one. This deletes the former while preserving the latter verbatim, in
+/// whatever order and position they appear, without having to name specific hosts here.
 fn strip_inert_scripts(html: &str) -> String {
     let mut result = String::with_capacity(html.len());
     let mut rest = html;
@@ -189,7 +198,7 @@ fn strip_inert_scripts(html: &str) -> String {
             None => (tail, ""),
         };
 
-        if opening_tag.contains(" src=") {
+        if opening_tag.contains(" src=") || opening_tag.contains("application/ld+json") {
             result.push_str(element);
         }
         rest = remainder;
@@ -229,6 +238,12 @@ mod tests {
         let html = r#"<body><script>(function(){window.__leptos_hydrate=1;})();</script><p>"hi"</p></body>"#;
         let expected = r#"<body><p>"hi"</p></body>"#;
         assert_eq!(strip_inert_scripts(html), expected);
+    }
+
+    #[test]
+    fn json_ld_data_block_survives_unchanged() {
+        let html = r#"<main><script type="application/ld+json">{"@type":"BlogPosting","headline":"Hi"}</script></main>"#;
+        assert_eq!(strip_inert_scripts(html), html);
     }
 
     #[test]
