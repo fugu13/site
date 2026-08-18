@@ -14,6 +14,8 @@ The site is built by a from-scratch, Leptos-0.8-ssr-only static generator: Lepto
 | `make lint` | Run clippy (deny warnings), check formatting, and audit dependencies |
 | `make fmt` | Auto-format the code |
 | `make audit` | Check `Cargo.lock` against the RustSec advisory database |
+| `make draft` | Scaffold `articles/draft.md`, a placeholder draft post |
+| `make blog` | Commit new/updated posts to a new branch, push it, then build and preview locally |
 
 ## Documentation
 

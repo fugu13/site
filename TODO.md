@@ -11,3 +11,9 @@ The home page's heading hierarchy jumped from the page's `<h1>` directly to an `
 ### A11Y-002: Long code blocks have no scrollable, keyboard-focusable region (Implemented 2026-08-14)
 
 Long code blocks rendered as bare `<pre><code>` with no wrapping `role="region" tabindex="0"` container, so a horizontally overflowing block couldn't be scrolled into view by a keyboard-only user the way the equivalent code blocks on this author's other project, pgdmn, can. Fixed in `src/markdown.rs` by wrapping every fenced code block's `<pre><code>` in a `<div role="region" tabindex="0" aria-label="Code sample">`.
+
+## Blog Authoring
+
+### BLOG-001: Local preview port is hardcoded in two places
+
+`Makefile`'s `PORT` variable (used to build the URL `make blog` opens) and the `127.0.0.1:4000` bind address in `src/bin/serve.rs` are two separate hardcoded copies of the same port number. Changing one without the other would make `make blog` open the wrong URL silently. Consider threading the port through a single source of truth (e.g. an environment variable `serve` reads, with the Makefile setting it) if the port ever needs to change.
