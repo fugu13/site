@@ -1,4 +1,4 @@
-# Russell Duhon's Blog
+# Russell Duhon's Software Development Writings
 
 Source for https://www.russellduhon.com — a personal blog: a home page listing posts and one page per post, generated from Markdown files in `articles/`.
 

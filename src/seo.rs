@@ -12,9 +12,10 @@ use std::fmt::Write;
 use crate::posts::Post;
 use crate::routes;
 
-/// The blog's name as presented to feed readers, social previews, and
-/// structured data.
-pub const SITE_TITLE: &str = "Russell Duhon's Blog";
+/// The site's name — the home page's title and heading, the feed title,
+/// `og:site_name`, the `WebSite` structured data name, and the `llms.txt`
+/// heading.
+pub const SITE_TITLE: &str = "Russell Duhon's Software Development Writings";
 
 /// The site author's name, used in page titles, the feed, and structured data.
 pub const AUTHOR: &str = "Russell Duhon";
@@ -291,7 +292,7 @@ mod tests {
             post("described", "Described", Some("What it covers."), None),
         ];
         let text = llms_txt(&posts);
-        assert!(text.starts_with("# Russell Duhon's Blog\n\n> "));
+        assert!(text.starts_with("# Russell Duhon's Software Development Writings\n\n> "));
         assert!(text.contains("- [Plain](https://www.russellduhon.com/post/plain/)\n"));
         assert!(text.contains(
             "- [Described](https://www.russellduhon.com/post/described/): What it covers.\n"

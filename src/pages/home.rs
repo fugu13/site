@@ -1,23 +1,19 @@
 use leptos::prelude::*;
 use leptos_meta::{Link, Meta, Title};
 
-/// The home page's name — the browser-tab / search-result title and the
-/// page's main heading.
-const TITLE: &str = "Russell Duhon's Software Development Writings";
-
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
-        <Title text=TITLE/>
+        <Title text=crate::seo::SITE_TITLE/>
         <Link rel="canonical" href=crate::routes::home_url()/>
         <Meta name="description" content=crate::seo::SITE_DESCRIPTION/>
-        <Meta property="og:title" content=TITLE/>
+        <Meta property="og:title" content=crate::seo::SITE_TITLE/>
         <Meta property="og:type" content="website"/>
         <Meta property="og:url" content=crate::routes::home_url()/>
         <Meta property="og:description" content=crate::seo::SITE_DESCRIPTION/>
         <Meta property="og:site_name" content=crate::seo::SITE_TITLE/>
         <main>
-            <h1>{TITLE}</h1>
+            <h1>{crate::seo::SITE_TITLE}</h1>
             <p>
                 "Traditional sporadic software developer blogging. I'm currently looking for a new position, "
                 <a href=crate::seo::LINKEDIN_URL>"hire me"</a>
