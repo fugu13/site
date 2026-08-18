@@ -2,7 +2,7 @@
 title: "Introducing pgdmn: DMN in the database"
 date: "2026-08-14T11:20:00-08:00"
 description: >
-  I made an open source PostgreSQL extension for executing business rules in PostgreSQL, which means you can separate defining them from defining your application code.
+  I made an open source PostgreSQL extension for executing business rules in PostgreSQL. Have business teams own and audit business rules, then execute them directly in your database without needing to translate them into code first.
 ---
 
 I've just released [pgdmn](https://www.pgdmn.com), available now on github and soon on pgxn. You can read the larger introduction to DMN for developers and why [DMN in the database](https://www.pgdmn.com/articles/database-dmn/) on the pgdmn site, but I wanted to talk a little bit more about how I got to this project and some future directions for DMN in modern software development, such as within LLM-powered applications.
