@@ -16,3 +16,8 @@ pub fn absolute(path: &str) -> String {
 pub fn post_url(slug: &str) -> String {
     absolute(&post(slug))
 }
+
+/// Absolute production URL of the home page.
+pub fn home_url() -> String {
+    absolute("/")
+}

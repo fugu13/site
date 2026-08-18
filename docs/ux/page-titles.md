@@ -6,7 +6,7 @@ What the browser tab, bookmarks, history, and screen-reader page announcements c
 
 | Page | Title shown |
 |---|---|
-| Home | Russell Duhon |
+| Home | Russell Duhon's Software Development Writings |
 | A post | Post Title · Russell Duhon |
 | Page not found | Page not found · Russell Duhon |
 

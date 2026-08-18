@@ -18,6 +18,16 @@ Long code blocks rendered as bare `<pre><code>` with no wrapping `role="region" 
 
 Pages carry Open Graph tags but no `twitter:card` / `twitter:title` / `twitter:image` tags and no `og:locale`. Most platforms fall back to Open Graph so the impact is small, but X/Twitter renders richer previews with explicit card tags. When adding them, consolidate the per-page head metadata (canonical, description, Open Graph) into one shared component so each page declares its facts once — today the block is hand-repeated in each page template, and a per-page omission is invisible.
 
+## Site Pages
+
+### CONSULT-001: Separate "Consulting" page
+
+Add a standalone Consulting page describing services offered, linked from the home page. The site currently has exactly three route shapes (home, post, 404), so this needs a new static route in the route table; the sitemap only lists home plus posts today and would need the new page added, and the page should get the standard head metadata (title, description, canonical).
+
+### BIO-001: Separate "Bio" page
+
+Add a standalone Bio page with a fuller professional biography than the home page's one-line introduction. Same route/sitemap/metadata considerations as CONSULT-001; once it exists, the `Person` structured data and `llms.txt` should link to it as the author's canonical bio.
+
 ## Images
 
 ### IMG-001: Explicit dimensions and lazy loading for article images

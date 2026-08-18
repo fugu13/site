@@ -28,6 +28,15 @@ pub fn shell() -> impl IntoView {
     }
 }
 
+/// A JSON-LD structured-data block — the one inline script form the site's
+/// no-JavaScript convention permits: inert data for search engines, never
+/// executed. The prerender strip step and the CI check both recognize exactly
+/// this element shape, so every page emits it through this one component.
+#[component]
+pub fn JsonLd(data: String) -> impl IntoView {
+    view! { <script type="application/ld+json" inner_html=data></script> }
+}
+
 /// The site's three analytics scripts, shared by every content page so
 /// there's exactly one place that names them.
 #[component]

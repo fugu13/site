@@ -1,8 +1,10 @@
-//! The site's machine-readable SEO surface: XML sitemap, Atom feed,
-//! `robots.txt`, and per-post JSON-LD structured data.
+//! The site's machine-readable SEO surface and shared identity constants.
 //!
-//! Everything here is generated from the same parsed posts the pages render
-//! from, so none of it can drift from the routes that actually exist.
+//! Covers the XML sitemap, Atom feed, `robots.txt`, `llms.txt`, and
+//! schema.org JSON-LD structured data, plus the site identity constants those
+//! outputs and the page templates share. Everything generated here derives
+//! from the same parsed posts the pages render from, so none of it can drift
+//! from the routes that actually exist.
 
 use std::borrow::Cow;
 use std::fmt::Write;
@@ -17,6 +19,15 @@ pub const SITE_TITLE: &str = "Russell Duhon's Blog";
 /// The site author's name, used in page titles, the feed, and structured data.
 pub const AUTHOR: &str = "Russell Duhon";
 
+/// One-sentence description of the site, used as the home page's meta
+/// description, the `WebSite` structured data description, and the
+/// `llms.txt` summary.
+pub const SITE_DESCRIPTION: &str = "Russell Duhon writes about software development topics such as DMN, Rust, property-based testing, PostgreSQL, WebAssembly, and Python.";
+
+/// The author's `LinkedIn` profile, linked from the home page bio and named
+/// as the `Person` structured data's `sameAs` identity.
+pub const LINKEDIN_URL: &str = "https://www.linkedin.com/in/russell-duhon-322a0244";
+
 /// Site-root-relative path of the generated sitemap.
 pub const SITEMAP_PATH: &str = "/sitemap.xml";
 
@@ -26,6 +37,9 @@ pub const FEED_PATH: &str = "/atom.xml";
 /// Site-root-relative path of the generated robots file.
 pub const ROBOTS_PATH: &str = "/robots.txt";
 
+/// Site-root-relative path of the generated llms.txt.
+pub const LLMS_PATH: &str = "/llms.txt";
+
 /// The browser-tab / search-result title of a page: the page's own name
 /// first, the author after a middot — the one convention
 /// `docs/ux/page-titles.md` documents.
@@ -34,13 +48,16 @@ pub fn page_title(page: &str) -> String {
 }
 
 /// Every machine-readable file the build writes, as (URL-space path, content)
-/// pairs — the single list `prerender` walks, so adding an output here is the
-/// whole change.
-pub fn machine_outputs(posts: &[Post]) -> [(&'static str, String); 3] {
-    [
+/// pairs — the one list `prerender` walks.
+///
+/// CI re-checks the same filenames independently and by name, deliberately,
+/// so a new output is added here and in the workflow's required-files list.
+pub fn machine_outputs(posts: &[Post]) -> Vec<(&'static str, String)> {
+    vec![
         (SITEMAP_PATH, sitemap_xml(posts)),
         (FEED_PATH, atom_feed(posts)),
         (ROBOTS_PATH, robots_txt()),
+        (LLMS_PATH, llms_txt(posts)),
     ]
 }
 
@@ -58,7 +75,7 @@ pub fn sitemap_xml(posts: &[Post]) -> String {
 "#,
     );
     if let Some(newest) = posts.first() {
-        push_sitemap_url(&mut xml, &routes::absolute("/"), &newest.date.to_rfc3339());
+        push_sitemap_url(&mut xml, &routes::home_url(), &newest.date.to_rfc3339());
     }
     for post in posts {
         push_sitemap_url(
@@ -99,7 +116,7 @@ pub fn atom_feed(posts: &[Post]) -> String {
 <author><name>{author}</name></author>
 "#,
         title = xml_escape(SITE_TITLE),
-        home = routes::absolute("/"),
+        home = routes::home_url(),
         feed_url = routes::absolute(FEED_PATH),
         author = xml_escape(AUTHOR),
     );
@@ -129,12 +146,67 @@ pub fn robots_txt() -> String {
     )
 }
 
+/// `llms.txt`: a Markdown site guide for AI crawlers and assistants, per the
+/// llmstxt.org convention — the site's name, its one-sentence description,
+/// and a link to every published post.
+pub fn llms_txt(posts: &[Post]) -> String {
+    let mut text = format!("# {SITE_TITLE}\n\n> {SITE_DESCRIPTION}\n\n## Posts\n\n");
+    for post in posts {
+        let url = routes::post_url(&post.slug);
+        let description = post
+            .description
+            .as_deref()
+            .map(|description| format!(": {description}"))
+            .unwrap_or_default();
+        // Writing to a String is infallible, so the Result is safely ignored.
+        let _ = writeln!(text, "- [{}]({url}){description}", post.title);
+    }
+    text
+}
+
+/// The stable JSON-LD `@id` that names the author's `Person` node, used by
+/// the node itself and by every reference to it — one definition, so the
+/// graph link can never dangle.
+fn person_id() -> String {
+    format!("{}#person", routes::home_url())
+}
+
+/// The author's schema.org `Person` node. The home page's graph defines it
+/// once and links it by `@id`; each post page inlines a full copy so the post
+/// document stands alone for a crawler that fetches only it.
+fn person_json_ld() -> serde_json::Value {
+    serde_json::json!({
+        "@type": "Person",
+        "@id": person_id(),
+        "name": AUTHOR,
+        "url": routes::home_url(),
+        "sameAs": [LINKEDIN_URL],
+    })
+}
+
+/// The home page's JSON-LD: a `WebSite` node plus the author's `Person` node,
+/// serialized ready to embed in a `<script type="application/ld+json">` data
+/// block.
+pub fn home_json_ld() -> String {
+    let home = routes::home_url();
+    serialize_for_script(&serde_json::json!({
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": format!("{home}#website"),
+                "url": home,
+                "name": SITE_TITLE,
+                "description": SITE_DESCRIPTION,
+                "author": { "@id": person_id() },
+            },
+            person_json_ld(),
+        ],
+    }))
+}
+
 /// One post's `BlogPosting` JSON-LD, serialized ready to embed in a
 /// `<script type="application/ld+json">` data block.
-///
-/// Every angle bracket is replaced with the JSON string escape "backslash
-/// u003c" (still plain JSON) so no string value can ever contain a literal
-/// closing script tag and end the surrounding element early.
 pub fn blog_posting_json_ld(post: &Post) -> String {
     let url = routes::post_url(&post.slug);
     let mut value = serde_json::json!({
@@ -144,11 +216,7 @@ pub fn blog_posting_json_ld(post: &Post) -> String {
         "datePublished": post.date.to_rfc3339(),
         "url": url,
         "mainEntityOfPage": url,
-        "author": {
-            "@type": "Person",
-            "name": AUTHOR,
-            "url": routes::absolute("/"),
-        },
+        "author": person_json_ld(),
     });
     if let Some(description) = &post.description {
         value["description"] = serde_json::Value::String(description.clone());
@@ -156,6 +224,14 @@ pub fn blog_posting_json_ld(post: &Post) -> String {
     if let Some(image) = &post.image {
         value["image"] = serde_json::Value::String(routes::absolute(image));
     }
+    serialize_for_script(&value)
+}
+
+/// Serialize a JSON-LD value for embedding in a script element. Every angle
+/// bracket is replaced with the JSON string escape "backslash u003c" (still
+/// plain JSON) so no string value can ever contain a literal closing script
+/// tag and end the surrounding element early.
+fn serialize_for_script(value: &serde_json::Value) -> String {
     value.to_string().replace('<', "\\u003c")
 }
 
@@ -201,11 +277,38 @@ mod tests {
     }
 
     #[test]
-    fn machine_outputs_cover_sitemap_feed_and_robots() {
+    fn machine_outputs_cover_sitemap_feed_robots_and_llms() {
         let outputs = machine_outputs(&[post("only", "Only", None, None)]);
         let paths: Vec<_> = outputs.iter().map(|(path, _)| *path).collect();
-        assert_eq!(paths, vec![SITEMAP_PATH, FEED_PATH, ROBOTS_PATH]);
+        assert_eq!(paths, vec![SITEMAP_PATH, FEED_PATH, ROBOTS_PATH, LLMS_PATH]);
         assert!(outputs.iter().all(|(_, content)| !content.is_empty()));
+    }
+
+    #[test]
+    fn llms_txt_lists_every_post_with_its_description() {
+        let posts = [
+            post("plain", "Plain", None, None),
+            post("described", "Described", Some("What it covers."), None),
+        ];
+        let text = llms_txt(&posts);
+        assert!(text.starts_with("# Russell Duhon's Blog\n\n> "));
+        assert!(text.contains("- [Plain](https://www.russellduhon.com/post/plain/)\n"));
+        assert!(text.contains(
+            "- [Described](https://www.russellduhon.com/post/described/): What it covers.\n"
+        ));
+    }
+
+    #[test]
+    fn home_json_ld_carries_website_and_person_nodes() {
+        let value: serde_json::Value =
+            serde_json::from_str(&home_json_ld()).expect("home JSON-LD should be valid JSON");
+        let graph = value["@graph"].as_array().expect("should have a @graph");
+        assert_eq!(graph[0]["@type"], "WebSite");
+        assert_eq!(graph[1]["@type"], "Person");
+        assert_eq!(graph[1]["@id"], "https://www.russellduhon.com/#person");
+        // The graph only links if the reference and the node carry the same id.
+        assert_eq!(graph[0]["author"]["@id"], graph[1]["@id"]);
+        assert_eq!(graph[1]["sameAs"][0], LINKEDIN_URL);
     }
 
     #[test]
@@ -265,6 +368,11 @@ mod tests {
         assert_eq!(value["description"], "The description.");
         assert_eq!(value["image"], "https://www.russellduhon.com/image.png");
         assert_eq!(value["author"]["name"], "Russell Duhon");
+        assert_eq!(
+            value["author"]["@id"],
+            "https://www.russellduhon.com/#person"
+        );
+        assert_eq!(value["author"]["sameAs"][0], LINKEDIN_URL);
     }
 
     #[test]
