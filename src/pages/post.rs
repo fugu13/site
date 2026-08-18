@@ -38,7 +38,7 @@ pub fn PostPage() -> impl IntoView {
                     <h1>{post.title.clone()}</h1>
                     <div inner_html=post.html.clone()></div>
                     <h6><a href="/">"home"</a></h6>
-                    <script type="application/ld+json" inner_html=crate::seo::blog_posting_json_ld(post)></script>
+                    <crate::app::JsonLd data=crate::seo::blog_posting_json_ld(post)/>
                     <crate::app::AnalyticsScripts/>
                 </main>
             }

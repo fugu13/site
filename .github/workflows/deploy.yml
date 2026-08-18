@@ -56,7 +56,7 @@ jobs:
       - name: Verify required output files
         run: |
           fail=0
-          for f in dist/index.html dist/404.html dist/sitemap.xml dist/atom.xml dist/robots.txt; do
+          for f in dist/index.html dist/404.html dist/sitemap.xml dist/atom.xml dist/robots.txt dist/llms.txt; do
             if [ ! -s "$f" ]; then
               echo "::error file=$f::Required file $f is missing or empty"
               fail=1
