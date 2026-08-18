@@ -4,7 +4,7 @@ use leptos_meta::Title;
 #[component]
 pub fn NotFoundPage() -> impl IntoView {
     view! {
-        <Title text="Page not found"/>
+        <Title text=crate::seo::page_title("Page not found")/>
         <main>
             <h1>"404"</h1>
             <p>

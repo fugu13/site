@@ -13,6 +13,12 @@ pub fn shell() -> impl IntoView {
             <head>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <link
+                    rel="alternate"
+                    type="application/atom+xml"
+                    title=crate::seo::SITE_TITLE
+                    href=crate::seo::FEED_PATH
+                />
                 <MetaTags/>
             </head>
             <body>
