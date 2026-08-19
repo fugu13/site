@@ -29,7 +29,7 @@ In Perseus, all these are configured in a `Template` that ultimately makes a mod
 via user-defined functions that handle each step. Here's the `Template` defining the blog page you're reading
 this on.
 
-```rust
+```rust The complete Perseus Template definition for the post page
  Template::build("post")
   .build_paths_fn(get_build_paths)
   .build_state_fn(get_build_state)
@@ -40,14 +40,14 @@ this on.
 
 And here's what each part of the template does.
 
-```rust
+```rust The build call naming the post base path
  Template::build("post")
 ```
 
 First, I define the base path I'm building here. Side-note: `index` is special, it means the empty string, aka the root.
 In this example, the base path in the URL will be `/post`.
 
-```rust
+```rust Registering get_build_paths to list the post sub-paths
   .build_paths_fn(get_build_paths)
 ```
 
@@ -58,7 +58,7 @@ I won't share the exact code, but a key thing is that none of the code has anyth
 typical Rust code for reading from the file system.
 
 
-```rust
+```rust Registering get_build_state to compute each page's state
   .build_state_fn(get_build_state)
 ```
 
@@ -67,7 +67,7 @@ and that function takes one path from `get_build_paths` (such as `my-awesome-pos
 In my case, it reads the markdown file for the blog post, renders the markdown to HTML, and also pulls some pieces
 from the markdown header like the title and date. Here's the data structure it returns.
 
-```rust
+```rust The Post struct returned as build state
 pub struct Post {
   pub title: String,
   pub date: chrono::DateTime<FixedOffset>,
@@ -83,7 +83,7 @@ Btw, this is called the state, not just the data, because it can change. Somethi
 and then the page would change, all in the browser.
 
 
-```rust
+```rust Registering the view and head functions
   .view_with_state(post_page)
   .head_with_state(head)
 ```
@@ -95,7 +95,7 @@ that Perseus can use in a bunch of different ways, from build or request time re
 side rendering whenever the state changes. It's just as easy to write as HTML, though, once you're used to a few
 details of how Rust works. Here's the `post_page` for this very page.
 
-```rust
+```rust The post_page view function, written with Sycamore
 #[auto_scope]
 fn post_page<G: Html>(cx: Scope, state: &crate::data::PostRx) -> View<G> {
   view! { cx,

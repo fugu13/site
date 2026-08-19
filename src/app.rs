@@ -13,6 +13,8 @@ pub fn shell() -> impl IntoView {
             <head>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+                <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64"/>
                 <link
                     rel="alternate"
                     type="application/atom+xml"

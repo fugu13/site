@@ -155,6 +155,28 @@ pre > code {
   font-size: 1.75em;
 }
 
+/* Same idea as .h3-size, for an <h3> that must look like the vendored h4
+ * rule. Keep in sync with the h4 rule's font-size if that ever changes. */
+.h4-size {
+  font-size: 1.5em;
+}
+
+/* Elements that must not be headings at all — the document outline is
+ * headings-only, and navigation links and dates are not sections — but keep
+ * the bold look their former h6 markup had. Only declarations that change
+ * anything are here: text size is inherited from the body, so each rule is
+ * the bold face plus, for the block-level nav links, the vendored h6
+ * margins. */
+.post-nav {
+  font-weight: 700;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.post-date {
+  font-weight: 700;
+}
+
 /* Tables */
 table {
   text-align: justify;
@@ -258,14 +280,17 @@ p a:hover {
   text-decoration: none;
 }
 
+/* Every value here must keep a WCAG AA contrast ratio of at least 4.5:1
+ * against the #f1f1f1 pre/code background above. The palette is a darkened
+ * take on the original Prism-like colors, same hues. */
 :root {
-  --hl-comment: #708090;
-  --hl-keyword: #0077aa;
-  --hl-type: #0077aa;
-  --hl-string: #669900;
+  --hl-comment: #5f6b7a;
+  --hl-keyword: #006699;
+  --hl-type: #006699;
+  --hl-string: #4a7600;
   --hl-number: #990055;
-  --hl-name: #dd4a68;
-  --hl-punctuation: #999999;
+  --hl-name: #c22e52;
+  --hl-punctuation: #6b6b6b;
 }
 
 .hl-comment,

@@ -20,7 +20,7 @@ Without further ado, the problem.
 
 Given a data structure like…
 
-```python
+```python The input: a dictionary of keys to lists of values
 boop = {
   “hello”: [1, 2, 3],
   “bye”: [4, 5, 6]
@@ -29,7 +29,7 @@ boop = {
 
 How do we transform that to a data structure like…
 
-```python
+```python The goal: a list of dictionaries, one per combination of values
 beep = [
   {“hello”: 1, “bye”: 4},
   {“hello”: 1, “bye”: 5},
@@ -49,7 +49,7 @@ When I’ve got a “convert between formats” problem like this, I often** sta
 
 Okay, so first, all the keys and values in boop are also present in beep. So we need to get those out of there no matter what. There’s a standard way to do that, `.items()`. What’s more, I know we’re going to want to do more with them immediately, and that to me means a comprehension, which gives me a first piece:
 
-```python
+```python A first fragment: iterating the dictionary items in a comprehension
 (… for (k, vs) in boop.items())
 ```
 
@@ -61,7 +61,7 @@ Turns out the “work” is easy, the dictionaries have a product (read as: ever
 
 I know I need to make dictionaries, and there are two main ways I like to do that Pythonically: the dict function, which can work with several forms of arguments, or dictionary comprehensions. I know what I’m working with comes out of `itertools.product()`, and the code will read simplest if there’s just a single argument to dict, so I’m going to write a partial line to see what that looks like:
 
-```python
+```python A sketch: building dictionaries from whatever product produces
 [
   dict(something) for something in
   itertools.product(
@@ -76,7 +76,7 @@ Okay, that helps. Since I know I want something to be an iterable of key-value 2
 
 Okay, so with k and vs I can write… ((k, v) for v in vs), and then I can drop that into the first partial piece I wrote:
 
-```python
+```python Nested comprehensions yielding key-value pairs for each key
 (((k, v) for v in vs) for (k, vs) in boop.items())
 ```
 
@@ -86,7 +86,7 @@ Stepping back, we have an iterable, where each value is an iterable of key-value
 
 What if we just take the above and stick it into product?
 
-```python
+```python REPL attempt: product returns an opaque product object
 >>> itertools.product(((k, v) for v in vs) for (k, vs) in boop.items())
 
 <itertools.product object at 0x103034360>
@@ -94,7 +94,7 @@ What if we just take the above and stick it into product?
 
 Oops, forgot to expand things for looking at in the REPL…
 
-```python
+```python REPL attempt: listing the product shows two generator objects, not nine tuples
 >>> list(itertools.product(((k, v) for v in vs) for (k, vs) in boop.items()))
 
 [(<generator object <genexpr>.<genexpr> at 0x10302b8e0>,), (<generator object <genexpr>.<genexpr> at 0x10302b938>,)]
@@ -106,7 +106,7 @@ Time to go look at the itertools.product() documentation and see why it isn’t 
 
 So…
 
-```python
+```python REPL attempt: star-expanding into product, but every key comes out as bye
 >>> list(itertools.product(*(((k, v) for v in vs) for (k, vs) in boop.items())))
 
 [((‘bye’, 1), (‘bye’, 4)), ((‘bye’, 1), (‘bye’, 5)), ((‘bye’, 1), (‘bye’, 6)), ((‘bye’, 2), (‘bye’, 4)), ((‘bye’, 2), (‘bye’, 5)), ((‘bye’, 2), (‘bye’, 6)), ((‘bye’, 3), (‘bye’, 4)), ((‘bye’, 3), (‘bye’, 5)), ((‘bye’, 3), (‘bye’, 6))]
@@ -114,7 +114,7 @@ So…
 
 Oh, that looks perfec… wait. What’s with all the keys being “bye”??? Now, this is something I’ve run into before, so I know it has to do with Python’s scoping rules. For now we’re going to fix it by turning one of the generator comprehensions into a list comprehension, making it concrete and immediate (instead of lazy). Look for where `[]` are used instead of `()`:
 
-```python
+```python REPL attempt: a concrete list comprehension fixes the scoping
 >>> list(itertools.product(*([(k, v) for v in vs] for (k, vs) in boop.items())))
 
 [((‘hello’, 1), (‘bye’, 4)), ((‘hello’, 1), (‘bye’, 5)), ((‘hello’, 1), (‘bye’, 6)), ((‘hello’, 2), (‘bye’, 4)), ((‘hello’, 2), (‘bye’, 5)), ((‘hello’, 2), (‘bye’, 6)), ((‘hello’, 3), (‘bye’, 4)), ((‘hello’, 3), (‘bye’, 5)), ((‘hello’, 3), (‘bye’, 6))]
@@ -124,13 +124,13 @@ Now it works right. I was pretty sure that would work because what was happening
 
 Okay, so what comes out of this is an bunch of iterables of 2-tuples, such as `((‘hello’, 1), (‘bye’, 4)) and ((‘hello’, 2), (‘bye’, 4))`. That’s exactly what we need for dict, which means we can use our earlier formulation!
 
-```python
+```python The complete working one-liner
 [dict(something) for something in itertools.product(*([(k, v) for v in vs] for (k, vs) in boop.items()))]
 ```
 
 And the output is exactly beep,
 
-```python
+```python The one-liner's output, matching the goal
 [{‘hello’: 1, ‘bye’: 4}, {‘hello’: 1, ‘bye’: 5}, {‘hello’: 1, ‘bye’: 6}, {‘hello’: 2, ‘bye’: 4}, {‘hello’: 2, ‘bye’: 5}, {‘hello’: 2, ‘bye’: 6}, {‘hello’: 3, ‘bye’: 4}, {‘hello’: 3, ‘bye’: 5}, {‘hello’: 3, ‘bye’: 6}]
 ```
 
@@ -138,21 +138,21 @@ Now that we have something working, how do we make it not an unreadable mess?
 
 First, time to return to names. We’re going to be making this a function (**functions are very Pythonic**), and that function needs a name. Tempting as boop_to_beep is, resist. As I was working through this, I started thinking of “hello” and “bye” as kinda like categories we needed to find every combination of. So, a decent function signature (absent other information) might be:
 
-```python
+```python Naming the function: combos taking categories
 def combos(categories):
   return ...(see above)...
 ```
 
 Next, time to break it up. One rule I have is, **I do not like reading nested comprehensions**, so I’ll start there. I do like comprehensions that look like: `[func(thing) for thing in things]`, so if I can come up with an understandable function to make the inner comprehension, I can use that construct. What does that function do? It turns a key and multiple values into a bunch of pairs. Not the worst idea for a function name:
 
-```python
+```python A first pairs helper taking a key and its values
 def pairs(key, values):
   return ((key, value) for value in values)
 ```
 
 Not too bad, but this is not a totally general function for making pairs. It works for a pretty specific situation. At least, **when I look at the function signature I don’t immediately know** how pairs would be made for a single key and some values. (I ask myself this sort of question a lot when writing code. ) Rather, it makes the pairs we need for categories. So, maybe this way of writing it?
 
-```python
+```python The revised pairs helper unpacking one category
 def pairs(category):
   key, values = category
   return ((key, value) for value in values)
@@ -160,14 +160,14 @@ def pairs(category):
 
 Now the signature tells me this is pairs for a category, and I can see right below that a category is a key and some values, and how we turn those into pairs. That’s also convenient for where we’re calling it, isolating the unpacking inside the function:
 
-```python
+```python combos calling the pairs helper, still one long line
 def combos(categories):
   return [dict(something) for something in itertools.product(*(pairs(category) for category in categories.items()))]
 ```
 
 That line is way too long and complex to read, what should we pull out? Another kinda-rule I have is, **I like using \* to expand arguments that are variables** instead of larger expressions. That and a little thought on naming leads to:
 
-```python
+```python Naming the pairs generator before expanding it into product
 def combos(categories):
   category_pairs = (pairs(category) for category in categories.items())
   return [dict(something) for something in itertools.product(*category_pairs)]
@@ -175,7 +175,7 @@ def combos(categories):
 
 Hmm, I could stop there, but itertools.product(), **the workhorse function, which is key to understanding how this function works, is a bit buried**, plus that last line is still a bit complicated for readability. Maybe…
 
-```python
+```python The final combos: named steps for pairs, products, and dictionaries
 def combos(categories):
   category_pairs = (pairs(category) for category in categories.items())
   pair_combos = itertools.product(*category_pairs)
@@ -184,7 +184,7 @@ def combos(categories):
 
 And there we go, that’s the solution I sent. In full:
 
-```python
+```python The complete solution: the pairs and combos functions
 import itertools
 
 

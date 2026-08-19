@@ -11,6 +11,9 @@ pub struct Post {
     pub slug: String,
     pub title: String,
     pub date: DateTime<FixedOffset>,
+    /// When the post was last substantively edited, if ever — the optional
+    /// `updated` front matter field.
+    pub updated: Option<DateTime<FixedOffset>>,
     pub description: Option<String>,
     pub image: Option<String>,
     pub html: String,
@@ -20,6 +23,8 @@ pub struct Post {
 struct FrontMatter {
     title: String,
     date: DateTime<FixedOffset>,
+    #[serde(default)]
+    updated: Option<DateTime<FixedOffset>>,
     #[serde(default)]
     description: Option<String>,
     #[serde(default)]
@@ -94,6 +99,7 @@ fn parse_post_source(name: &str, slug: String, source: &str) -> Result<Option<Po
         slug,
         title: front_matter.title,
         date: front_matter.date,
+        updated: front_matter.updated,
         description: front_matter.description,
         image,
         html,
@@ -169,5 +175,20 @@ mod tests {
         let post = parse_post_source("post.md", "post".to_string(), source)
             .expect("front matter should parse");
         assert!(post.is_some());
+    }
+
+    #[test]
+    fn updated_front_matter_is_optional_and_parses_when_present() {
+        let without = "---\ntitle: \"P\"\ndate: \"2026-01-01T00:00:00-08:00\"\n---\n\nBody.\n";
+        let post = parse_post_source("p.md", "p".to_string(), without)
+            .expect("front matter should parse")
+            .expect("post should be published");
+        assert!(post.updated.is_none());
+
+        let with = "---\ntitle: \"P\"\ndate: \"2026-01-01T00:00:00-08:00\"\nupdated: \"2026-02-01T00:00:00-08:00\"\n---\n\nBody.\n";
+        let post = parse_post_source("p.md", "p".to_string(), with)
+            .expect("front matter should parse")
+            .expect("post should be published");
+        assert!(post.updated.is_some());
     }
 }

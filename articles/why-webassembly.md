@@ -22,7 +22,7 @@ Why is it such a big deal?
 ![an old wooden waterwheel](/waterwheel.jpg)
 
 
-### A brief "what"
+## A brief "what"
 
 WebAssembly is a small, simple virtual machine with an easily parsed binary format
 designed to
@@ -36,7 +36,7 @@ communication uses capability-based security, which has a key property: platform
 using WebAssembly only provide _positive_ permission to interact with the outside
 environment, so unintended access is much less likely.
 
-### Why not Javascript?
+## Why not Javascript?
 
 Javascript is vastly more complicated! And while a predecessor to WebAssembly, asm.js,
 was a subset of Javascript with similar properties, WebAssembly has smaller files that load
@@ -45,7 +45,7 @@ faster with clearer semantics, and is much easier to implement separately from J
 Additionally, the WebAssembly road map has features that couldn't be easily implemented in
 Javascript.
 
-### Why yes WebAssembly?
+## Why yes WebAssembly?
 
 WebAssembly has three strategically critical properties.
 
@@ -79,7 +79,7 @@ a few years ago, and with WebAssembly, that capability becomes possible for any 
 That's what's happening with this website--I wrote it in Rust, in a framework named Perseus
 that can run a pregeneration phase, a dynamic backend, and a browser frontend,
 all with the same code. Read more about it at
-[Writing a Static Site with Rust and Perseus](post/static-site-rust-perseus/).
+[Writing a Static Site with Rust and Perseus](/post/static-site-rust-perseus/).
 
 And the fast, secure virtual machine makes it an excellent platform for any user-provided
 code, not just in the browser. For example, code running in [Lucet, an open
@@ -91,7 +91,7 @@ WebAssembly rapidly, but I expect to see WebAssembly popping up in other context
 secure, fast starting user-provided code is useful, from streaming data platforms to video
 game scripting.
 
-### How does that work with Python?
+## How does that work with Python?
 
 Python is already widely used for web application backends and for data science and
 data engineering. I think there are two big ways we'll especially see Python used to write
@@ -113,7 +113,7 @@ capabilities yet, so consider the second one a prediction. The amazing [Pyodide 
 for running Python as WebAssembly](https://pyodide.org/) has already ported many of the
 critical packages that use C code, such as numpy, pandas, and scipy.
 
-### Summing up
+## Summing up
 
 Ultimately, WebAssembly will be one of those things that is everywhere, but you don't
 think about very much most of the time. Instead, you'll mostly be excited when you're

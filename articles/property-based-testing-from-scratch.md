@@ -16,7 +16,7 @@ I’ve lost count of how many times a programmer has told me about their own pas
 
 Imagine your past self wrote a first take on an age-checking function.
 
-```python
+```python A first, naive age-checking function
 import datetime
 
 
@@ -25,7 +25,7 @@ def check_age(birthday, today):
 ```
 This does not look that bad. I mean, it isn’t right, and if you’ve done much with calendars you can probably point at a likely problem area (leap years), but this seems like a great starting point. Time to write some tests! Maybe a few simple ones to get started…
 
-```python
+```python Two example-based tests of check_age
 import datetime
 
 from agecheck import check_age
@@ -58,7 +58,7 @@ Good tests are about saving brainpower. Instead of having to already basically u
 
 Okay, one kind of entity basically jumps out in this code: birthdays. What are some properties birthdays have? Well, they’re always in the same month as the month a person was born in, right? The code doesn’t make it easy to work with that 21st birthday, though. It hides inside check_age. What if first we extract out a function that calculates 21st birthdays, and focus our testing on that?
 
-```python
+```python Extracting a twenty_first birthday function from check_age
 
 import datetime
 
@@ -73,7 +73,7 @@ def twenty_first(birthday):
 
 Now how about we write another test…
 
-```python
+```python A single example test of the same-month property
 import datetime
 
 from agecheck import twenty_first
@@ -99,7 +99,7 @@ That’s why even though we’re checking a property, this new test is no more s
 
 Don’t worry about everything in it for now, we’ll explain it in detail soon, just take a quick look.
 
-```python
+```python The from-scratch property-based test, with a random day generator
 import datetime
 import time
 import random
@@ -150,7 +150,7 @@ Oh! That’s exactly the leap year thing we were worried about.
 
 Okay, now that we have a failing test (that we didn’t need to invent by knowing about leap years in advance), how about we figure out a fix? Maybe something simple will work. Leap years are usually every four years, so between birth and 21st birthday there should be five leap years, meaning five extra days, right? Okay, so how about a small change to our twenty_first function, adding an extra five days.
 
-```python
+```python A first fix attempt: adding five days for leap years
 import datetime
 
 
@@ -190,7 +190,7 @@ Huh, November 30th 2056. Same as the test found, because we calculated it how ou
 
 The whole leap year thing is a bit complicated. Not unexpected, if you’ve done calendar stuff before. Sometimes there are five leap days over a 21 year span, sometimes six (and sometimes four!). How do we know which? Luckily, the python calendar library has something for us. We’ll step a few steps ahead, then fix one last thing. First, update the code to look like
 
-```python
+```python Counting leap days with the calendar module
 
 import datetime
 import calendar
@@ -215,7 +215,7 @@ That logic probably makes a lot of sense if you think about it. What’s more, i
 
 Wait, when does the 21st birthday for someone born _on_ a leap day occur? In a real life situation, you’d figure out what legal standard matters for your company. Now, since it turns out in practice this is mostly not handled by the law, we’re just going to make an arbitrary decision: in non-leap years, the birthday for someone born February 29th is February 28th. Add that logic and our code looks like
 
-```python
+```python The final version, handling February 29th birthdays
 
 import datetime
 import calendar
@@ -238,7 +238,7 @@ Run the property-based test again and… no errors! One interesting thing here i
 
 Here’s the code again:
 
-```python
+```python The from-scratch property-based test again, for a closer look
 import datetime
 import time
 import random
@@ -286,7 +286,7 @@ If we were using a property-based testing library, like we do in the rest of thi
 
 In order to generate random days, we need to start with some random thing we can already generate. Luckily, the Python standard library already knows how to generate a random value from a range of numbers, and also how to turn a number of seconds into a date, so that’s what we do. If we were using hypothesis, the property-based testing library for the rest of the book, we would use the ready made generators it has for dates. In fact, the entire file would look like this, using hypothesis (and pytest to run the test):
 
-```python
+```python The same property test rewritten with Hypothesis
 
 from hypothesis import given
 from hypothesis.strategies import dates

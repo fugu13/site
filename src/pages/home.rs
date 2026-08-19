@@ -30,8 +30,8 @@ pub fn HomePage() -> impl IntoView {
                         .map(|description| view! { <blockquote>{description}</blockquote> });
                     view! {
                         <div style="margin-bottom: 3em;">
-                            <h4><a href=crate::routes::post(&post.slug)>{post.title.clone()}</a></h4>
-                            <h6 style="display: inline"><span>{date}</span></h6>
+                            <h3 class="h4-size"><a href=crate::routes::post(&post.slug)>{post.title.clone()}</a></h3>
+                            <span class="post-date">{date}</span>
                             {description}
                         </div>
                     }
