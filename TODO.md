@@ -14,6 +14,10 @@ Long code blocks rendered as bare `<pre><code>` with no wrapping `role="region" 
 
 ## SEO
 
+### LINK-001: Automated internal link checking at build or CI time
+
+Two malformed internal article links have now shipped (a double-slash `/post//…` and a relative `post/…` missing its leading slash — see BUGHISTORY.md), and nothing catches the next one. Add an automated check — at build time in `prerender`, or a crawl step in CI (e.g. linkinator against the built `dist/`) — that fails on any internal link that doesn't resolve to a generated page.
+
 ### SEO-001: Twitter card and locale metadata
 
 Pages carry Open Graph tags but no `twitter:card` / `twitter:title` / `twitter:image` tags and no `og:locale`. Most platforms fall back to Open Graph so the impact is small, but X/Twitter renders richer previews with explicit card tags. When adding them, consolidate the per-page head metadata (canonical, description, Open Graph) into one shared component so each page declares its facts once — today the block is hand-repeated in each page template, and a per-page omission is invisible.

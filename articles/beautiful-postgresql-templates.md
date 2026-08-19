@@ -21,7 +21,7 @@ features of Omnigres other than core PostgreSQL and PL/Rust.
 
 Once you're connected with `psql`, make a toy database to work with.
 
-```sql
+```sql Creating and populating the toy lists and items tables
 create table lists (id int, name text);
 
 create table items (list_id int, item text, weight int);
@@ -40,13 +40,13 @@ join together partial HTML for each list item, but this will rapidly become a ha
 
 Here's how to do it with PL/Rust and minijinja. First, set up the PL/Rust extension.
 
-```sql
+```sql Enabling the PL/Rust extension
 CREATE EXTENSION plrust;
 ```
 
 Next, define a PL/Rust function to render the HTML.
 
-```sql
+```sql The PL/Rust page function rendering an HTML template with minijinja
 CREATE OR REPLACE FUNCTION
     plrust.page(title TEXT, items TEXT[])
     RETURNS TEXT LANGUAGE plrust
@@ -94,7 +94,7 @@ they're slotted directly into the template.
 
 Then, call your Rust function anywhere you want HTML from SQL.
 
-```sql
+```sql Calling the page function to build HTML for each list
 select plrust.page(
     name,
     array_agg(item order by weight desc)
@@ -107,7 +107,7 @@ your template infrastructure into a privately hosted crate and import it in your
 For another common scenario, maybe your SQL has JSON in it. You can work with JSON objects directly,
 or you can use Rust's powerful serde capabilities to work with typed values.
 
-```sql
+```sql The JSON variant: a typed serde struct rendered by a pagetwo function
 create table json_stuff (data jsonb);
 
 insert into json_stuff values (

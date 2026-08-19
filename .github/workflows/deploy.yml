@@ -56,7 +56,7 @@ jobs:
       - name: Verify required output files
         run: |
           fail=0
-          for f in dist/index.html dist/404.html dist/sitemap.xml dist/atom.xml dist/robots.txt dist/llms.txt; do
+          for f in dist/index.html dist/404.html dist/sitemap.xml dist/atom.xml dist/robots.txt dist/llms.txt dist/favicon.svg dist/favicon.png; do
             if [ ! -s "$f" ]; then
               echo "::error file=$f::Required file $f is missing or empty"
               fail=1
@@ -77,6 +77,12 @@ jobs:
           # data: every post page must still carry its JSON-LD block.
           if ! grep -rq 'application/ld+json' dist/post/; then
             echo "::error::No JSON-LD structured data found in any post page"
+            fail=1
+          fi
+          # The prerender strips Leptos's inert <!> fragment markers; one
+          # surviving means that pass regressed.
+          if grep -rq '<!>' dist/; then
+            echo "::error::Leptos fragment marker <!> found in dist/ output"
             fail=1
           fi
           if [ "$fail" -ne 0 ]; then

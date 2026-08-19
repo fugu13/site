@@ -13,7 +13,7 @@ The site publishes everything a search engine or feed reader needs to discover, 
 
 | File or tag | What it does |
 |---|---|
-| `sitemap.xml` | Lists the home page and every published post with its publication date as `lastmod`. No `changefreq` or `priority` (search engines ignore them), and no synthetic dates — search engines stop trusting `lastmod` on a site once it proves inaccurate, so it only ever carries real front-matter dates. Drafts are excluded automatically because they are excluded from the parsed post list itself. |
+| `sitemap.xml` | Lists the home page and every published post with its publication date — or its front-matter `updated` date, when a post has been revised — as `lastmod`. No `changefreq` or `priority` (search engines ignore them), and no synthetic dates — search engines stop trusting `lastmod` on a site once it proves inaccurate, so it only ever carries real front-matter dates. Drafts are excluded automatically because they are excluded from the parsed post list itself. |
 | `atom.xml` | Atom feed of every published post, newest first, each entry carrying the post's title, canonical link, publication date, and front-matter description as its summary. Every page's head advertises it via a `rel="alternate"` link so feed readers can autodiscover it from any URL. |
 | `robots.txt` | Allows all crawling and names the sitemap's absolute URL, so crawlers find the sitemap with no manual submission. |
 | `llms.txt` | A Markdown guide for AI crawlers and assistants, per the llmstxt.org convention: the site's name, its one-sentence description, and a link to every published post with its description. |
@@ -21,7 +21,8 @@ The site publishes everything a search engine or feed reader needs to discover, 
 | Titles | The browser-tab and search-result title names the page first and the author after a middot, per the formats specified in `docs/ux/page-titles.md`. |
 | Meta description | Each post's front-matter `description` doubles as its search-snippet description; the home page uses the site's one-sentence description, which the `WebSite` structured data and `llms.txt` share. A post with no description simply has no description tag — nothing is synthesized. |
 | Open Graph tags | Each page declares its title, type, canonical URL, description, image, and site name for link previews on social and messaging apps. |
-| Structured data | The home page embeds a JSON-LD graph of a `WebSite` node and a `Person` node for the author (name, site URL, LinkedIn identity); each post page embeds a `BlogPosting` node — headline, publication date, canonical URL, description and image when present — whose author is that same `Person`, carried by a stable identifier so every page names one consistent identity. This is the one inline script form the site's no-JavaScript convention permits: it is inert data, never executed. |
+| Favicon | An "R" monogram in the site's colors, served as an SVG with a PNG fallback and linked from every page's head — the icon browsers show in tabs and search engines show beside results. |
+| Structured data | The home page embeds a JSON-LD graph of a `WebSite` node and a `Person` node for the author (name, site URL, LinkedIn identity); each post page embeds a `BlogPosting` node — headline, publication and modification dates, canonical URL, description and image when present — whose author is that same `Person`, carried by a stable identifier so every page names one consistent identity. This is the one inline script form the site's no-JavaScript convention permits: it is inert data, never executed. |
 
 ## Where it comes from
 

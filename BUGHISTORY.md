@@ -1,5 +1,17 @@
 # Bug History
 
+## Malformed internal links in article Markdown (two occurrences)
+
+**Symptom:** An in-article link to another post 404s. Two shipped instances: `articles/property-based-testing-from-scratch.md` linked `/post//muddled-property-based-tests/` (double slash), and `articles/why-webassembly.md` linked `post/static-site-rust-perseus/` (no leading slash, so the browser resolved it relative to the current post's directory as `/post/why-webassembly/post/static-site-rust-perseus/`).
+
+**Root cause:** Internal links in article Markdown are free-form text with no validation anywhere in the build — a typo'd path renders fine and only fails when a reader or crawler follows it. The relative-link variant is the more insidious one because it looks almost correct in the source.
+
+**Fix:** Corrected both links to the absolute `/post/<slug>/` form. No automated guard exists yet; LINK-001 in TODO.md tracks adding an internal link check at build or CI time.
+
+**Files involved:** `articles/property-based-testing-from-scratch.md`, `articles/why-webassembly.md`.
+
+**Reoccurrence check:** Every link to another post inside `articles/*.md` must start with `/post/` — absolute from the site root, exactly one slash after `post`, trailing slash at the end. When editing any article, check its internal links against the pattern; until LINK-001 lands, a quick `grep -n '](post/' articles/*.md` and `grep -n '/post//' articles/*.md` should both return nothing.
+
 ## Two words glued together on four live posts (not reproduced on the new site)
 
 **Symptom:** On the live (pre-migration) site, four posts each have exactly one spot where two words run together with no space: "haven't interacted with it much" on `/post/why-webassembly/` renders as "haven't interactedwith it much"; "traversal for a binary tree" on `/post/testing-data-structures-binary-tree/` renders as "traversal for abinary tree"; "PL/Rust, you can use" on `/post/beautiful-postgresql-templates/` renders as "PL/Rust,you can use"; and "I'm using one called Perseus" on `/post/static-site-rust-perseus/` renders as "I'm usingone called Perseus". A word-by-word diff of each full article body against the live page found exactly one such discrepancy per page.

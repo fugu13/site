@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     static_routes.generate(&options).await;
 
     nest_html_files(dist)?;
-    strip_inert_scripts_in_dir(dist)?;
+    strip_inert_markup_in_dir(dist)?;
 
     for (path, content) in site::seo::machine_outputs(site::posts::all()) {
         // The paths are URL-space constants; the leading slash comes off to
@@ -139,24 +139,25 @@ fn nest_html_files_at(dir: &Path, root: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-/// Recursively strip inert hydration `<script>` elements from every `.html` file under
-/// `dir`, leaving every real (`src`-bearing) script — the site's three analytics
-/// scripts — and every JSON-LD data block untouched wherever they appear. The CI
-/// workflow independently verifies that no script's `src` falls outside the three
-/// approved analytics domains and that no other inline script survives.
-fn strip_inert_scripts_in_dir(dir: &Path) -> std::io::Result<()> {
+/// Recursively strip inert Leptos markup — hydration `<script>` elements and empty
+/// fragment markers — from every `.html` file under `dir`, leaving every real
+/// (`src`-bearing) script — the site's three analytics scripts — and every JSON-LD
+/// data block untouched wherever they appear. The CI workflow independently verifies
+/// that no script's `src` falls outside the three approved analytics domains, that no
+/// other inline script survives, and that no fragment marker remains.
+fn strip_inert_markup_in_dir(dir: &Path) -> std::io::Result<()> {
     for entry in std::fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
         if entry.file_type()?.is_dir() {
-            strip_inert_scripts_in_dir(&path)?;
+            strip_inert_markup_in_dir(&path)?;
             continue;
         }
         if path.extension().and_then(|ext| ext.to_str()) != Some("html") {
             continue;
         }
         let html = std::fs::read_to_string(&path)?;
-        let stripped = strip_inert_scripts(&html);
+        let stripped = strip_inert_markup(&html);
         if stripped != html {
             std::fs::write(&path, stripped)?;
         }
@@ -164,21 +165,43 @@ fn strip_inert_scripts_in_dir(dir: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-/// Remove every `<script>...</script>` element whose opening tag has no `src` attribute,
-/// except `type="application/ld+json"` data blocks — inert structured data for search
-/// engines, deliberately kept even though they are inline (the JSON they carry never
-/// executes). Leptos's own inert hydration bookkeeping is always emitted inline (no
-/// `src`); every real script this site ever loads — its three analytics scripts —
-/// always has one. This deletes the former while preserving the latter verbatim, in
-/// whatever order and position they appear, without having to name specific hosts here.
-fn strip_inert_scripts(html: &str) -> String {
+/// Remove Leptos's two kinds of inert output markup in one pass.
+///
+/// First, every `<script>...</script>` element whose opening tag has no `src`
+/// attribute, except `type="application/ld+json"` data blocks — inert structured data
+/// for search engines, deliberately kept even though they are inline (the JSON they
+/// carry never executes). Leptos's own inert hydration bookkeeping is always emitted
+/// inline (no `src`); every real script this site ever loads — its three analytics
+/// scripts — always has one. This deletes the former while preserving the latter
+/// verbatim, in whatever order and position they appear, without having to name
+/// specific hosts here.
+///
+/// Second, every `<!>` empty fragment marker — a placeholder Leptos emits between
+/// dynamic view children, meaningless in output that never hydrates and malformed
+/// markup to strict parsers. Sweeping the final bytes rather than fixing each view
+/// is deliberate: it also catches markers from views nobody has written yet.
+fn strip_inert_markup(html: &str) -> String {
+    const MARKER: &str = "<!>";
     let mut result = String::with_capacity(html.len());
     let mut rest = html;
 
-    while let Some(start) = rest.find("<script") {
+    loop {
+        let next_script = rest.find("<script");
+        let next_marker = rest.find(MARKER);
+        let (start, is_marker) = match (next_script, next_marker) {
+            (None, None) => break,
+            (Some(script), None) => (script, false),
+            (None, Some(marker)) => (marker, true),
+            (Some(script), Some(marker)) => (script.min(marker), marker < script),
+        };
         result.push_str(&rest[..start]);
-        let tail = &rest[start..];
 
+        if is_marker {
+            rest = &rest[start + MARKER.len()..];
+            continue;
+        }
+
+        let tail = &rest[start..];
         let Some(tag_end) = tail.find('>').map(|i| i + 1) else {
             // No closing `>` on the opening tag at all: malformed, keep verbatim and stop.
             result.push_str(tail);
@@ -230,26 +253,39 @@ mod tests {
     #[test]
     fn allowed_analytics_script_survives_unchanged() {
         let html = r#"<head><script defer="" src="https://app.tinyanalytics.io/pixel/MB6jAtnTO5M0SZ9n"></script></head>"#;
-        assert_eq!(strip_inert_scripts(html), html);
+        assert_eq!(strip_inert_markup(html), html);
     }
 
     #[test]
     fn unrecognized_script_is_removed() {
         let html = r#"<body><script>(function(){window.__leptos_hydrate=1;})();</script><p>"hi"</p></body>"#;
         let expected = r#"<body><p>"hi"</p></body>"#;
-        assert_eq!(strip_inert_scripts(html), expected);
+        assert_eq!(strip_inert_markup(html), expected);
+    }
+
+    #[test]
+    fn empty_fragment_markers_are_removed() {
+        let html = "<div><!><p>content</p><!></div>";
+        assert_eq!(strip_inert_markup(html), "<div><p>content</p></div>");
+    }
+
+    #[test]
+    fn fragment_marker_before_a_kept_script_leaves_the_script_alone() {
+        let html = r#"<!><script defer="" src="https://plausible.io/js/script.js"></script>"#;
+        let expected = r#"<script defer="" src="https://plausible.io/js/script.js"></script>"#;
+        assert_eq!(strip_inert_markup(html), expected);
     }
 
     #[test]
     fn json_ld_data_block_survives_unchanged() {
         let html = r#"<main><script type="application/ld+json">{"@type":"BlogPosting","headline":"Hi"}</script></main>"#;
-        assert_eq!(strip_inert_scripts(html), html);
+        assert_eq!(strip_inert_markup(html), html);
     }
 
     #[test]
     fn script_free_html_is_untouched() {
         let html = "<main><h1>Russell Duhon</h1><p>No scripts here.</p></main>";
-        assert_eq!(strip_inert_scripts(html), html);
+        assert_eq!(strip_inert_markup(html), html);
     }
 
     #[test]
@@ -263,7 +299,7 @@ mod tests {
             r#"<script defer="" async="" src="https://scripts.simpleanalyticscdn.com/latest.js"></script>"#,
             r#"<script defer="" src="https://plausible.io/js/script.js" data-domain="russellduhon.com"></script>"#,
         );
-        assert_eq!(strip_inert_scripts(html), expected);
+        assert_eq!(strip_inert_markup(html), expected);
     }
 
     #[test]
@@ -272,6 +308,6 @@ mod tests {
         // inert inline bookkeeping, not vetting domains — that's the CI workflow's
         // independent, stricter check (only the three named analytics domains).
         let html = r#"<script src="https://example.test/whatever.js"></script>"#;
-        assert_eq!(strip_inert_scripts(html), html);
+        assert_eq!(strip_inert_markup(html), html);
     }
 }

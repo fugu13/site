@@ -6,9 +6,11 @@
 //! from the same parsed posts the pages render from, so none of it can drift
 //! from the routes that actually exist.
 
-use std::borrow::Cow;
 use std::fmt::Write;
 
+use chrono::{DateTime, FixedOffset};
+
+use crate::escape::xml_escape;
 use crate::posts::Post;
 use crate::routes;
 
@@ -64,25 +66,26 @@ pub fn machine_outputs(posts: &[Post]) -> Vec<(&'static str, String)> {
 
 /// The XML sitemap: the home page plus every published post.
 ///
-/// `lastmod` carries only real front-matter dates — the home page uses the
-/// newest post's date, since publishing a post is what changes it. There is
-/// deliberately no `changefreq` or `priority` (search engines ignore them),
-/// and no synthetic "today" dates (search engines stop trusting `lastmod`
-/// entirely once it proves inaccurate).
+/// `lastmod` carries only real front-matter dates — each post's publication
+/// or `updated` date, and for the home page the newest of those, since a post
+/// changing is what changes it. There is deliberately no `changefreq` or
+/// `priority` (search engines ignore them), and no synthetic "today" dates
+/// (search engines stop trusting `lastmod` entirely once it proves
+/// inaccurate).
 pub fn sitemap_xml(posts: &[Post]) -> String {
     let mut xml = String::from(
         r#"<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 "#,
     );
-    if let Some(newest) = posts.first() {
-        push_sitemap_url(&mut xml, &routes::home_url(), &newest.date.to_rfc3339());
+    if let Some(newest) = posts.iter().map(last_modified).max() {
+        push_sitemap_url(&mut xml, &routes::home_url(), &newest.to_rfc3339());
     }
     for post in posts {
         push_sitemap_url(
             &mut xml,
             &routes::post_url(&post.slug),
-            &post.date.to_rfc3339(),
+            &last_modified(post).to_rfc3339(),
         );
     }
     xml.push_str("</urlset>\n");
@@ -104,8 +107,10 @@ pub fn atom_feed(posts: &[Post]) -> String {
     // Atom requires a feed-level <updated>; the empty fallback is unreachable
     // while the site has any published post at all.
     let updated = posts
-        .first()
-        .map_or_else(String::new, |post| post.date.to_rfc3339());
+        .iter()
+        .map(last_modified)
+        .max()
+        .map_or_else(String::new, |date| date.to_rfc3339());
     let mut xml = format!(
         r#"<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -129,7 +134,11 @@ pub fn atom_feed(posts: &[Post]) -> String {
         let _ = writeln!(xml, "<title>{}</title>", xml_escape(&post.title));
         let _ = writeln!(xml, "<id>{url}</id>");
         let _ = writeln!(xml, "<link href=\"{url}\"/>");
-        let _ = writeln!(xml, "<updated>{}</updated>", post.date.to_rfc3339());
+        let _ = writeln!(
+            xml,
+            "<updated>{}</updated>",
+            last_modified(post).to_rfc3339()
+        );
         if let Some(description) = &post.description {
             let _ = writeln!(xml, "<summary>{}</summary>", xml_escape(description));
         }
@@ -215,6 +224,7 @@ pub fn blog_posting_json_ld(post: &Post) -> String {
         "@type": "BlogPosting",
         "headline": post.title,
         "datePublished": post.date.to_rfc3339(),
+        "dateModified": last_modified(post).to_rfc3339(),
         "url": url,
         "mainEntityOfPage": url,
         "author": person_json_ld(),
@@ -236,23 +246,10 @@ fn serialize_for_script(value: &serde_json::Value) -> String {
     value.to_string().replace('<', "\\u003c")
 }
 
-/// Escape XML metacharacters, borrowing the input unchanged when it has none.
-fn xml_escape(text: &str) -> Cow<'_, str> {
-    if !text.contains(['&', '<', '>', '"', '\'']) {
-        return Cow::Borrowed(text);
-    }
-    let mut escaped = String::with_capacity(text.len());
-    for c in text.chars() {
-        match c {
-            '&' => escaped.push_str("&amp;"),
-            '<' => escaped.push_str("&lt;"),
-            '>' => escaped.push_str("&gt;"),
-            '"' => escaped.push_str("&quot;"),
-            '\'' => escaped.push_str("&apos;"),
-            _ => escaped.push(c),
-        }
-    }
-    Cow::Owned(escaped)
+/// The moment a post last changed: its `updated` front matter when set,
+/// otherwise its publication date.
+fn last_modified(post: &Post) -> DateTime<FixedOffset> {
+    post.updated.unwrap_or(post.date)
 }
 
 #[cfg(test)]
@@ -266,10 +263,26 @@ mod tests {
             title: title.to_owned(),
             date: DateTime::parse_from_rfc3339("2026-01-02T03:04:05-08:00")
                 .expect("test date should parse"),
+            updated: None,
             description: description.map(str::to_owned),
             image: image.map(str::to_owned),
             html: String::new(),
         }
+    }
+
+    #[test]
+    fn updated_front_matter_drives_every_modification_date() {
+        let mut edited = post("edited", "Edited", None, None);
+        edited.updated = DateTime::parse_from_rfc3339("2026-02-03T00:00:00-08:00").ok();
+
+        let value: serde_json::Value = serde_json::from_str(&blog_posting_json_ld(&edited))
+            .expect("JSON-LD should be valid JSON");
+        assert_eq!(value["datePublished"], "2026-01-02T03:04:05-08:00");
+        assert_eq!(value["dateModified"], "2026-02-03T00:00:00-08:00");
+
+        let posts = [edited];
+        assert!(sitemap_xml(&posts).contains("<lastmod>2026-02-03T00:00:00-08:00</lastmod>"));
+        assert!(atom_feed(&posts).contains("<updated>2026-02-03T00:00:00-08:00</updated>"));
     }
 
     #[test]
@@ -365,6 +378,7 @@ mod tests {
             serde_json::from_str(&serialized).expect("JSON-LD should be valid JSON");
         assert_eq!(value["@type"], "BlogPosting");
         assert_eq!(value["headline"], "Full Post");
+        assert_eq!(value["dateModified"], value["datePublished"]);
         assert_eq!(value["url"], "https://www.russellduhon.com/post/full/");
         assert_eq!(value["description"], "The description.");
         assert_eq!(value["image"], "https://www.russellduhon.com/image.png");

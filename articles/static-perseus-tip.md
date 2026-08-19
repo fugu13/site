@@ -8,7 +8,7 @@ It took me a bit to put all the pieces together, so I'm posting them here in one
 
 If you're making a Perseus site designed for static export, instead of
 
-```rust
+```rust A Perseus main function configured with a server
 #[perseus::main(perseus_axum::dflt_server)]
 pub fn main<G: Html>() -> PerseusApp<G> {
   PerseusApp::new()
@@ -18,7 +18,7 @@ pub fn main<G: Html>() -> PerseusApp<G> {
 
 use `main_export`, so it looks like
 
-```rust
+```rust The same main function switched to main_export for static export
 #[perseus::main_export]
 pub fn main<G: Html>() -> PerseusApp<G> {
   PerseusApp::new()

@@ -28,6 +28,10 @@ TODO
 ## TODO
 
 TODO
+
+\`\`\`python TODO one-line screen-reader description of this code sample
+TODO
+\`\`\`
 EOF
 
 echo "Created articles/draft.md"

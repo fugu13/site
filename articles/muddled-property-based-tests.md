@@ -14,7 +14,7 @@ In a previous post I solved a problem by [Messily Thinking Pythonically](/post/m
 
 To recap, the core of the problem is simple: transform data from structures like
 
-```python
+```python The input dictionary from the previous post
 boop = {
   “hello”: [1, 2, 3],
   “bye”: [4, 5, 6]
@@ -23,7 +23,7 @@ boop = {
 
 Into structures like
 
-```python
+```python The expected output: every combination of the input values
 beep = [
   {“hello”: 1, “bye”: 4},
   {“hello”: 1, “bye”: 5},
@@ -41,7 +41,7 @@ You can review the particular solution I came up with, but this post doesn’t r
 
 Okay, so, testing that. The obvious first test is:
 
-```python
+```python A basic example test: one input, one expected output
 def test_combos():
   boop = …
   beep = …
@@ -54,7 +54,7 @@ That’s where **property-based testing** comes in, a testing technique I’m a 
 
 But what’s a property-based test? First, here’s an example (without boilerplate):
 
-```python
+```python Property test: output length equals the product of the value-list lengths
 def test_right_number_products(example):
   lengths = [len(values) for values in example.values()]
   number_expected = reduce(mul, lengths, 1) # product of all lengths
@@ -66,7 +66,7 @@ Okay, so this test takes in some example data (don’t worry about that yet, exc
 
 Where did the example come from, though? The testing framework, hypothesis, makes it. To explain how, here’s the boilerplate:
 
-```python
+```python Hypothesis boilerplate: generators for keys, values, and category dictionaries
 from hypothesis import given
 from hypothesis.strategies import text, lists, integers, floats, one_of, dictionaries
 
@@ -94,7 +94,7 @@ Seems like a lot of work compared to just having some examples, maybe? But it is
 
 Luckily, working up a generator for values like you need comes with dividends: you can keep using it. Three more property-based tests:
 
-```python
+```python Three more property tests: uniqueness, all values present, all keys present
 @given(categories)
 def test_all_values_unique(example):
   transformed = combos(example)
@@ -123,7 +123,7 @@ This post is less about how I made the tests and more about explicating their st
 
 Here’s the complete original code plus the full tests:
 
-```python
+```python The complete combos implementation under test
 import itertools
 
 
@@ -138,7 +138,7 @@ def combos(categories):
   return [dict(combo) for combo in pair_combos]
 ```
 
-```python
+```python The complete test file with all four property tests
 from categories import combos
 
 from functools import reduce

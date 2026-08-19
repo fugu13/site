@@ -27,12 +27,12 @@ That's what this blog post explores.
 ![an example binary tree](/binarytree.png)
 
 
-### A simple implementation
+## A simple implementation
 
 To start, here's a simple implementation using recursion. Our binary trees are generically
 typed, and composed of nodes with a value and optional left and right children.
 
-```python
+```python The Node dataclass and a recursive in-place traversal
 from dataclasses import dataclass
 from typing import TypeVar, Generic, Optional, Iterable
 
@@ -53,12 +53,12 @@ def traverse_in_place_recursive(node: Node[T]) -> Iterable[Node[T]]:
     yield from traverse_in_place_recursive(node.right)
 ```
 
-### A simple test
+## A simple test
 
 Now, how to test this? A typical approach would have a handful of unit tests that look
 something like the one below.
 
-```python
+```python A hand-written unit test of one example tree
 from tree.structure import Node
 from tree.traverse import traverse_in_place_recursive
 
@@ -90,7 +90,7 @@ individually tested handwritten examples don't feel very persuasive.
 And even if every edge case for the existing implementation is covered, what if an updated
 implementation has different edge cases?
 
-### Tests with confidence
+## Tests with confidence
 
 I've written before about [Property-based Testing](/post/muddled-property-based-tests/),
 and that's what I recommend here. A typical test sets up an exact scenario, then checks
@@ -109,14 +109,14 @@ in good faith that also has those properties.
 Property-based testing is an excellent fit for data structures & algorithms questions,
 because they generally possess strong, well-known properties.
 
-### Generating
+## Generating
 
 In order to perform property-based testing, the framework needs to know how to generate
 the values being tested. Frameworks can automatically infer many kinds of values, so
 sometimes no custom generation is required, and other times, like this one, the
 values can be generated with a short custom generator, seen here.
 
-```python
+```python A Hypothesis strategy generating random trees with unique values
 register_type_strategy(Node, recursive(
   builds(Node, uuids()),
   lambda nodes: builds(Node, uuids(), left=none() | nodes, right=none() | nodes),
@@ -134,7 +134,7 @@ Or, to omit unnecessary details, the first argument of `recursive` says
 "some Nodes look like this" and the second one says, "you can make Nodes that
 contain other Nodes by combining them like this function says".
 
-### A test that sounds complicated, but is simple
+## A test that sounds complicated, but is simple
 
 A very simple property for in-place traversal is, the number of items in
 the traversal should be the same as the number of nodes in the tree. I'm using a
@@ -144,7 +144,7 @@ is the same as number of nodes in the tree.
 
 First, here's one possible length implementation for Nodes.
 
-```python
+```python A length method counting a tree's nodes recursively
   def __len__(self) -> int:
     left_length = len(self.left) if self.left else 0
     right_length = len(self.right) if self.right else 0
@@ -153,7 +153,7 @@ First, here's one possible length implementation for Nodes.
 
 Then, the test.
 
-```python
+```python Property test: traversal yields as many unique values as the tree has nodes
 @given(tree=...)
 def test_correct_length(tree: Node):
   # using set to make sure we get the right number of unique values, which guards against
@@ -180,7 +180,7 @@ case that omits part of the tree.
 
 Okay, now how do we gain confidence this is an in-place traversal?
 
-### A more complicated test
+## A more complicated test
 
 So, imagine we've got our tree, and we pick any two nodes, randomly. Then, we find the
 least common ancestor of the two nodes--the lowest node in the whole tree that's got
@@ -198,7 +198,7 @@ then pick one node from the left, and one node from the right!
 
 And here's the complete code to do that.
 
-```python
+```python Property test: left descendants come before their subtree root, right after
 @given(tree=..., data=data())
 def test_left_before_right(tree: Node, data: DataObject):
   # turn the full list of nodes, which we know has the right number, into a list
@@ -232,7 +232,7 @@ Since it is a little more complicated, here's the line-by-line.
 First, do the traversal we're going to test, and make it a list instead of a generator
 since we'll need the values multiple times.
 
-```python
+```python Step one: materializing the traversal into a list
 everything = list(traverse_in_place(tree))
 ```
 
@@ -241,7 +241,7 @@ random Node in the traversal, and make sure that subtree has at least 2 nodes. T
 function means that, if it doesn't, Hypothesis will backtrack until it finds a test case
 where the drawn value does.
 
-```python
+```python Step two: drawing a random subtree of at least two nodes
 starting_subtree = data.draw(sampled_from(everything))
 assume(len(starting_subtree) > 1)
 ```
@@ -250,7 +250,7 @@ Third, find one value on the left, and one value on the right. Either might be e
 since we're covering the case where there might be a single child under a parent (the case
 I said to ignore earlier), and if so, use None as a placeholder.
 
-```python
+```python Step three: drawing one node from each branch
 any_left = data.draw(sampled_from(list(traverse_in_place(starting_subtree.left)))) if starting_subtree.left else None
 any_right = data.draw(sampled_from(list(traverse_in_place(starting_subtree.right)))) if starting_subtree.right else None
 ```
@@ -258,7 +258,7 @@ any_right = data.draw(sampled_from(list(traverse_in_place(starting_subtree.right
 Last, with cases for the different scenarios, make sure whatever values we have are in
 the expected order in the original traversal.
 
-```python
+```python Step four: asserting the drawn nodes appear in traversal order
 if any_left and any_right:
   assert everything.index(any_left) < everything.index(starting_subtree) < everything.index(any_right)
 elif any_left:
@@ -271,14 +271,14 @@ And with one test to verify the code does _some_ traversal, and one test to veri
 randomly selected nodes are in the expected order for an _in-place_ traversal, we
 can be really confident that's what this does.
 
-### Reimplementing
+## Reimplementing
 
 Okay, now time to make another implementation! We could run all these tests again for
 that implementation, but there's an easier way. Imagine we've just written a new stack-based
 implementation of in-place traversal. A complete test for the new implementation looks
 like this.
 
-```python
+```python Property test: the stack implementation matches the recursive one
 @given(tree=...)
 def test_stack_same_as_recursive(tree: Node):
   assert list(traverse_in_place_stack(tree)) == list(traverse_in_place_recursive(tree))
@@ -287,7 +287,7 @@ def test_stack_same_as_recursive(tree: Node):
 After all, if the stack implementation, for a bunch of generated trees, results in the
 same output as the recursive implementation, there we go!
 
-### Conclusions
+## Conclusions
 
 The property-based tests here include zero hand construction of test data,
 zero need to know the algorithm implementation's edge cases
@@ -303,11 +303,11 @@ structures and algorithms with well-defined correctness properties, actually has
 those properties, even as the implementation changes.
 
 
-### Complete files
+## Complete files
 
 `tree/structure.py`
 
-```python
+```python Complete file: the Node dataclass with its length method
 from dataclasses import dataclass
 from typing import TypeVar, Generic, Optional
 
@@ -327,7 +327,7 @@ class Node(Generic[T]):
 
 `tree/traverse.py`
 
-```python
+```python Complete file: the recursive and stack-based traversals
 from typing import TypeVar, Iterable
 
 from tree.structure import Node
@@ -365,7 +365,7 @@ def traverse_in_place_stack(node: Node[T]) -> Iterable[Node[T]]:
 
 `tests/test_in_place_traversal.py`
 
-```python
+```python Complete file: all the traversal tests
 from hypothesis import given, assume
 from hypothesis.strategies import data, uuids, builds, register_type_strategy, none, recursive, DataObject, \
   sampled_from

@@ -34,10 +34,10 @@ pub fn PostPage() -> impl IntoView {
                 })}
                 <Meta property="og:site_name" content=crate::seo::SITE_TITLE/>
                 <main>
-                    <h6><a href="/">"home"</a></h6>
+                    <p class="post-nav"><a href="/">"home"</a></p>
                     <h1>{post.title.clone()}</h1>
                     <div inner_html=post.html.clone()></div>
-                    <h6><a href="/">"home"</a></h6>
+                    <p class="post-nav"><a href="/">"home"</a></p>
                     <crate::app::JsonLd data=crate::seo::blog_posting_json_ld(post)/>
                     <crate::app::AnalyticsScripts/>
                 </main>
